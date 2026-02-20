@@ -1,5 +1,5 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 02_facebook_processing
+# 02_facebook
 # Purpose of Script: Import Daily Facebook SOR CSVs
 # Input: Individual Platform CSVs in '03_sor_platforms/date' folder.
 # Output: 
@@ -78,8 +78,37 @@ dq_times <- as.data.table(tibble::tribble(
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 dq_content_date <- as.data.table(tibble::tribble(
   ~min_content_date, ~max_content_date,
-  min(dt$content_date), max(dt$content_date)
-))
+  min(dt$content_date), max(dt$content_date)))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Application Date/Time
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+dq_application_date <- as.data.table(tibble::tribble(
+  ~min_application_date, ~max_application_date,
+  min(dt$application_date), max(dt$application_date)))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Territory
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# clean
+dt$terr <- sapply(dt$territorial_scope, function(x) {
+  x <- sub("^\\[", "", x)
+  x <- sub("\\]$", "", x)
+  gsub('"', "", x)
+})
+
+dt <- dt[, terr := ifelse(terr == eu_inc_eea, "all",
+                   ifelse(terr == eu_ex_eea, "eu",
+                          tolower(terr)))]
+
+# dq
+dq_terr <- as.data.table(tibble::tribble(
+  ~terr_all, ~terr_eu, ~terr_other,
+  nrow(dt[terr == 'all']), nrow(dt[terr == 'eu']),
+  nrow(dt[!(terr %in% c('all','eu'))])))
+  
+# drop
+dt <- dt[, territorial_scope := NULL]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # UUID
@@ -130,24 +159,61 @@ dt <- dt[, automated_det := ifelse(automated_detection == "Yes", 1, 0)]
 
 # dq
 dq_detection <- as.data.table(tibble::tribble(
-  ~statement, ~number,
-  "Automated Decision", nrow(dt[automated_det == 1]),
-  "Not Automated Decision", nrow(dt[automated_det == 0])
-))
+  ~no_automated_det, ~no_not_automated_det,
+  nrow(dt[automated_det == 1]), nrow(dt[automated_det == 0])))
 
 # check
-if(sum(dq_detection$number) != dq_rows$number){
+if(sum(dq_detection$no_automated_det + dq_detection$no_not_automated_det) != dq_rows$number){
   print("Check sum of Automated Detection")
 }
 
 # drop
 dt <- dt[, automated_detection := NULL]
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Automated Decision
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# dq
+dq_decision <- as.data.table(tibble::tribble(
+  ~no_dec_fully, ~ no_dec_partial, ~no_dec_not,
+  nrow(dt[automated_decision == "AUTOMATED_DECISION_FULLY"]),
+  nrow(dt[automated_decision == "AUTOMATED_DECISION_PARTIALLY"]),
+  nrow(dt[automated_decision == "AUTOMATED_DECISION_NOT_AUTOMATED"])))
+
+dt <- dt[, automated_des := ifelse(automated_decision == "AUTOMATED_DECISION_FULLY", "F",
+                            ifelse(automated_decision == "AUTOMATED_DECISION_PARTIALLY", "P",
+                            "N"))]
+
+# drop
+dt <- dt[, automated_decision := NULL]
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Process & Check Potentially Empty Columns
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Account Type
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+dq_account_type <- as.data.table(tibble::tribble(
+  ~no_account_type_empty, 
+  nrow(dt[is.na(account_type)])))
+
+# check
+if(dq_rows$number_of_rows != dq_account_type$no_account_type_empty){
+  print("Account Type is populated - check")
+}
+
+# drop
+dt <- dt[, account_type := NULL]
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Drop Unnecessary Columns
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Reorganize Data 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-setcolorder(dt, c("date","time","p_name","content_date",
-                  "automated_det"))
+setcolorder(dt, c("p_name", "terr","date","time","content_date", "application_date",
+                  "automated_det", "automated_des"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Collect Data Quality Results

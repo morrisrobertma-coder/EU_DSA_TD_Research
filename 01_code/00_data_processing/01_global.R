@@ -1,5 +1,5 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 01_global_processing
+# 01_global
 # Purpose of Script: Extract, import global SOR data, cutting down to relevant
 #                    companies.
 # Input: Daily Global Files in '00_sor_global_zipped' folder.
