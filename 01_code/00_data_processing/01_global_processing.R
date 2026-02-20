@@ -1,0 +1,107 @@
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 01_global_processing
+# Purpose of Script: Extract, import global SOR data, cutting down to relevant
+#                    companies.
+# Input: Daily Global Files in '00_sor_global_zipped' folder.
+# Output: Individual Platform CSVs in '03_sor_platforms' folder.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Initialization
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# In/Out Path
+zip_in <- paste0(inp, "00_sor_global_zipped/")
+zip_mid_out <- paste0(inp, "01_sor_global_unzipped/")
+zip_out <- paste0(inp, "02_sor_global_ununzipped/")
+out_per_platform <- paste0(inp, "03_sor_platforms/")
+
+# Per Company Output
+out_facebook <- paste0(out_per_platform,"01_facebook/")
+out_youtube <- paste0(out_per_platform,"02_youtube/")
+out_whatsapp <- paste0(out_per_platform,"03_whatsapp/") 
+out_instagram <- paste0(out_per_platform,"04_instagram/")
+out_tiktok <- paste0(out_per_platform,"05_tiktok/")
+out_snap <- paste0(out_per_platform,"06_snap/")
+out_x <- paste0(out_per_platform,"07_x/")
+
+# Company/Platform Name Mapping
+map_platform <- as.data.table(tibble::tribble(
+  ~platform, ~platform_name, ~output,
+  "facebook", "Facebook", out_facebook,
+  "youtube", "YouTube", out_youtube,
+  "whatsapp", "WhatsApp Channels", out_whatsapp,
+  "instagram", "Instagram", out_instagram,
+  "tiktok", "TikTok", out_tiktok,
+  "snapchat", "Snapchat", out_snap,
+  "x", "X", out_x))
+
+# Create Folders
+for(out_files in c(zip_mid_out, zip_out,
+                   out_facebook, out_youtube, out_whatsapp,
+                   out_instagram, out_tiktok, out_snap,
+                   out_x)){
+dir.create(paste0(out_files,"/",date_out))
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Data Processing
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Unzip Global File
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# define global file
+global_file_process <- paste0("sor-global-",date_out,"-full.zip")
+
+# unzip file
+unzip(paste0(zip_in, global_file_process), exdir = paste0(zip_mid_out, date_out))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Zips in Zips
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+zip_inside_zip <- list.files(paste0(zip_mid_out, date_out))
+
+for(file in zip_inside_zip){
+  
+  # unzip file 
+  unzip(paste0(zip_mid_out, date_out,"/", file), exdir = paste0(zip_out, date_out))
+  
+  # remove zipped file
+  file.remove(paste0(zip_mid_out, date_out,"/", file))
+  
+  # list unzipped files
+  files_csv <- list.files(paste0(zip_out, date_out))
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Import CSVs
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  for(file_csv in files_csv){
+    
+    # import data
+    dt <- fread(paste0(zip_out, date_out,"/", file_csv))
+    
+    # filter for companies, save output in company folder
+    for(platform in 1:nrow(map_platform)){
+      
+      # platform to extract
+      extract_plat <- map_platform[platform, platform_name]
+      
+      # output folder
+      out_plat <- map_platform[platform, output]
+      
+      # extract data
+      dt_cut <- dt[platform_name == paste0(extract_plat)]
+      
+      # write csv
+      if(nrow(dt_cut)> 0){
+        write.csv(dt_cut, file=paste0(out_plat, paste0(date_out,"/",file_csv)))
+      }
+      
+      # remove data
+      rm(dt_cut)
+    }
+    
+    # remove data table
+    rm(dt)
+    
+    # remove file
+    file.remove(paste0(zip_out, date_out,"/", file_csv))
+    
+  }
+}

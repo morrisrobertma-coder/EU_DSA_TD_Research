@@ -1,0 +1,7 @@
+# gitignore file
+
+# ignore all large DSA TD downloads
+*.zip
+
+# ignore all unzipped csv files
+*.csv
