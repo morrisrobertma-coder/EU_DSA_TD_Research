@@ -5,34 +5,10 @@
 # Input: Daily Global Files in '00_sor_global_zipped' folder.
 # Output: Individual Platform CSVs in '03_sor_platforms' folder.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+print(paste0("GLOBAL DATA PROCESSING: ", date_out, " START"))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Initialization
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-# In/Out Path
-zip_in <- paste0(inp, "00_sor_global_zipped/")
-zip_mid_out <- paste0(inp, "01_sor_global_unzipped/")
-zip_out <- paste0(inp, "02_sor_global_ununzipped/")
-out_per_platform <- paste0(inp, "03_sor_platforms/")
-
-# Per Company Output
-out_facebook <- paste0(out_per_platform,"01_facebook/")
-out_youtube <- paste0(out_per_platform,"02_youtube/")
-out_whatsapp <- paste0(out_per_platform,"03_whatsapp/") 
-out_instagram <- paste0(out_per_platform,"04_instagram/")
-out_tiktok <- paste0(out_per_platform,"05_tiktok/")
-out_snap <- paste0(out_per_platform,"06_snap/")
-out_x <- paste0(out_per_platform,"07_x/")
-
-# Company/Platform Name Mapping
-map_platform <- as.data.table(tibble::tribble(
-  ~platform, ~platform_name, ~output,
-  "facebook", "Facebook", out_facebook,
-  "youtube", "YouTube", out_youtube,
-  "whatsapp", "WhatsApp Channels", out_whatsapp,
-  "instagram", "Instagram", out_instagram,
-  "tiktok", "TikTok", out_tiktok,
-  "snapchat", "Snapchat", out_snap,
-  "x", "X", out_x))
-
 # Create Folders
 for(out_files in c(zip_mid_out, zip_out,
                    out_facebook, out_youtube, out_whatsapp,
@@ -105,3 +81,7 @@ for(file in zip_inside_zip){
     
   }
 }
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+print(paste0("GLOBAL DATA PROCESSING: ", date_out, " END"))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

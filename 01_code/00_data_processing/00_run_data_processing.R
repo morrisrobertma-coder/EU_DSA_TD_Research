@@ -9,11 +9,15 @@ rm(list = ls())
 
 # Packages
 library(data.table)
+library(arrow)
 
 # Input/Output Paths
+### Data Input
 inp <- c("~/06_university/00_university_of_sussex/05_summer_semester/05_dissertation/00_data/")
-inp_code <- c("~/06_university/00_university_of_sussex/05_summer_semester/05_dissertation/01_code/")
 global <- c("00_sor_global_zipped/")
+
+### Code Input
+inp_code <- c("~/06_university/00_university_of_sussex/05_summer_semester/05_dissertation/01_code/")
 
 # Definitions 
 source(paste0(inp_code, "xx_config.R"))
@@ -34,26 +38,33 @@ for (i in seq_along(global_files)){
 dates <- as.Date(dates, format = "%Y-%m-%d")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Run Data Processing
+# Run Data Pipeline
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run for all dates
-
 for(i in seq_along(dates)){
   date_out <- as.Date(dates[i])
+  
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # 01_global_processing.R
+  # Run Global Data Processing
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # run global processing
   source(paste0(inp_code,"00_data_processing/01_global.R"))
   
   # clean up
   gc()
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # 02_facebook_processing.R
+  # Run Platform Level Data Quality
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  for(plat in map_platform[, platform]){
+  source(paste0(inp_code,"00_data_processing/02_dq.R"))
+  }
   
-  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Run Data Cleaning
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  for(plat in map_platform[, platform]){
+    source(paste0(inp_code,"00_data_processing/03_clean.R"))
+  }
   
 }
 
