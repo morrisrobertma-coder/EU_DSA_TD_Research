@@ -26,6 +26,9 @@ out_dq_path <- paste0(inp, "04_dq/")
 # Data Cleaning
 out_clean_path <- paste0(inp, "05_clean/")
 
+# Aggregation
+out_agg_daily_path <- paste0(inp, "06_aggregated/00_daily/")
+
 ### Platforms ----
 # Company/Platform Name Mapping
 map_platform <- as.data.table(tibble::tribble(
@@ -242,14 +245,138 @@ cols_to_keep <- c("platform_name","territorial_scope","created_at",
 # Rename Columns
 # n.b. only use this after the fully processing - not one to one mapping
 # with 'cols_to_keep_above'
-cols_order <- c('p_name','terr','date','time','content_d',
-                'app_date','aut_det','aut_dec','content_type',
-                'content_lang','source','cat','cat_spec',
+cols_order <- c('p_name','date','time','content_d',
+                'app_d','aut_det','aut_dec','cont_type',
+                'cont_lang','source','cat','cat_spec',
                 'des_ground','incomp_c_ground','incomp_c_illegal',
                 'des_vis','des_vis_other','des_vis_end_date',
                 'des_mon','des_mon_other','des_mon_end_date',
                 'des_prov','des_prov_end_date','des_acc',
                 'des_acc_end_date')
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Column Mapping ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Mapping of columns after analysis to meaningful names
+cols_remap <- as.data.table(tibble::tribble(
+  ~old, ~new,
+  # detection
+  "n_aut_detection","automated_detection_no",
+  "y_aut_detection","automated_detection_yes",
+  
+  # decision
+  "f_aut_decision","automated_detecision_fully",
+  "p_aut_decision","automated_detecision_partially",
+  "n_aut_decision","automated_detecision_not_automated",
+  
+  # content type
+  "ap_content_type","content_type_app",
+  "au_content_type","content_type_audio",
+  "i_content_type","content_type_image",
+  "p_content_type","content_type_product",
+  "sm_content_type","content_type_synthetic_media",
+  "t_content_type","content_type_text",
+  "v_content_type","content_type_video",
+  "o_content_type","content_type_other",
+  "NA_content_type","content_type_NA",
+  
+  # content language
+  "NA_content_language","content_language_NA",
+  
+  # source type
+  "a16_source","source_a16",
+  "tf_source","source_trusted_flagger",
+  "o_source","source_other_notification",
+  "v_source","source_voluntary",
+  
+  # content category - high level
+  "aw_cat_high_level","animal_welfare",
+  "ci_cat_high_level","consumer_information",
+  "cv_cat_high_level","cyber_violence",
+  "cvaw_cat_high_level","cyber_violence_against_women",
+  "dppv_cat_high_level","data_proection_and_privacy",
+  "ihs_cat_high_level","illegal_or_harmful_speech",
+  "ipi_cat_high_level","intellectual_prop_infringement",
+  "necde_cat_high_level","negative_effects_on_civic_dicourse_or_elections",
+  "nsn_cat_high_level","category_not_specified",
+  "ovt_cat_high_level","other_violation_terms_conditions",
+  "pm_cat_high_level","protection_of_minors",
+  "rps_cat_high_level","public_security_risk",
+  "sf_cat_high_level","scams_and_fraud",
+  "sh_cat_high_level","self_harm",
+  "upp_cat_high_level","unsafe_and_prohibited_products",
+  "v_cat_high_level","violence",
+  "NA_cat_high_level","category_NA",
+  
+  # content category - detail
+  "ah_cat_detailed","animal_harm",
+  "asm_cat_detailed","adult_sexual_material",
+  "sr_cat_detailed","age_specific_restrictions",
+  "srm_cat_detailed","age_specific_restrictions_minor",
+  "bdb_cat_detailed","biometric_data_breach",
+  "bag_cat_detailed","bullying_against_girls",
+  "csam_cat_detailed","child_s_a_material",
+  "csamd_cat_detailed","child_s_a_material_deepfake",
+  "pdis_cat_detailed","promoting_eating_disorders",
+  "coh_cat_detailed","coordinated_harm",
+  "copi_cat_detailed","copyright_infringement",
+  "cybi_cat_detailed","cyber_bullying_intimidation",
+  "cyh_cat_detailed","cyber_harassment",
+  "cyhaw_cat_detailed","cyber_harassment_against_women",
+  "cyi_cat_detailed","cyber_incitiment",
+  "cys_cat_detailed","cyber_stalking",
+  "cysaw_cat_detailed","cyber_stalking_against_women",
+  "df_cat_detailed","data_falsification",
+  "def_cat_detailed","defemation",
+  "di_cat_detailed","design_infringement",
+  "dis_cat_detailed","discrimination",
+  "mis_cat_detailed","misinformation_disinformation",
+  "fgdis_cat_detailed","female_gendered_disinformation",
+  "gii_cat_detailed","geographic_indications_infringment",
+  "gr_cat_detailed","geographic_requirements",
+  "gsnp_cat_detailed","goods_services_not_permitted",
+  "gsem_cat_detailed","grooming_sexual_enticement_minors",
+  "hs_cat_detailed","hate_speech",
+  "ha_cat_detailed","hidden_advertisement",
+  "hex_cat_detailed","human_exploitation",
+  "het_cat_detailed","human_trafficking",
+  "ilo_cat_detailed","illegal_organisations",
+  "iah_cat_detailed","impersonation_account_hijacking",
+  "il_cat_detailed","inauthentic_listings",
+  "iur_cat_detailed","inauthentic_user_reviews",
+  "iaw_cat_detailed","incitement_against_women",
+  "ivh_cat_detailed","incitement_violence_hatred",
+  "iit_cat_detailed","insufficient_information_on_traders",
+  "lr_cat_detailed","language_requirements",
+  "micr_cat_detailed","misleading_info_consumer_rights",
+  "migs_cat_detailed","misleading_info_goods_services",
+  "mpg_cat_detailed","missing_processing_ground",
+  "ncis_cat_detailed","non_consensual_image_sharing",
+  "ncisaw_cat_detailed","non_consensual_image_sharing_women",
+  "ncmd_cat_detailed","non_consensual_deepfake",
+  "ncmdaw_cat_detailed","non_consensual_deepfake_against_women",
+  "ncp_cat_detailed","noncompliance_pricing",
+  "nud_cat_detailed","nudity",
+  "pati_cat_detailed","patent_infringement",
+  "phis_cat_detailed","phising",
+  "prop_cat_detailed","prohibited_products",
+  "pys_cat_detailed","pyramid_schemes",
+  "rtbf_cat_detailed","right_to_be_forgotten",
+  "envd_cat_detailed","environmental_damage",
+  "rpubh_cat_detailed","risk_public_health",
+  "selfm_cat_detailed","self_mutilation",
+  "stk_cat_detailed","stalking",
+  "sui_cat_detailed","suicide",
+  "tc_cat_detailed","terrorist_content",
+  "trsi_cat_detailed","trade_secret_infringement",
+  "tradei_cat_detailed","trademark_infringement",
+  "trwg_cat_detailed","trafficking_women_girls",
+  "unsa_cat_detailed","unlawful_sale_animals",
+  "unch_cat_detailed","unsafe_challenges",
+  "unprod_cat_detailed","unsafe_products",
+  "vioeul_cat_detailed","violation_eu_law",
+  "vionatl_cat_detailed","violation_national_law",
+  "NA_cat_detailed","detailed_category_NA"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # End

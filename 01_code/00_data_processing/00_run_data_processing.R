@@ -23,6 +23,13 @@ inp_code <- c("~/06_university/00_university_of_sussex/05_summer_semester/05_dis
 source(paste0(inp_code, "xx_config.R"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run Parameters ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Set Parameter = TRUE if global zipped files should be
+# deleted after processing
+remove_global_files <- FALSE
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Available Global Files
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Extract File names
@@ -38,7 +45,7 @@ for (i in seq_along(global_files)){
 dates <- as.Date(dates, format = "%Y-%m-%d")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Run Data Pipeline
+# Run Data Processing Pipeline ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run for all dates
 for(i in seq_along(dates)){
@@ -66,10 +73,24 @@ for(i in seq_along(dates)){
     source(paste0(inp_code,"00_data_processing/03_clean.R"))
   }
   
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Run Upstream Data Deletion
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  source(paste0(inp_code,"00_data_processing/04_upstream_clean.R"))
+  
 }
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run Data Analysis Pipeline ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Daily Analysis 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+source(paste0(inp_code,"01_agg/00_agg_daily.R"))
+
+
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Clean-Up
+# Clean-Up ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 gc()
 rm(list = ls())

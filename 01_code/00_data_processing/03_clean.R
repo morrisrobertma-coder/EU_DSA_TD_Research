@@ -63,9 +63,26 @@ for(subfile in rel_files){
     gsub('"', "", x)
   })
   
-  dt[, terr := ifelse(terr == eu_inc_eea, "eu_inc_eea",
-               ifelse(terr == eu_ex_eea, "eu_ex_eea",
-               tolower(terr)))][, territorial_scope := NULL]
+  dt[, terr_eu_inc_eea := as.integer(terr == eu_inc_eea)]
+  dt[, terr_eu_ex_eea := as.integer(terr == eu_ex_eea)]
+  
+  # identify all countries
+  all_countries <- unique(unlist(strsplit(dt$terr, ",")))
+  all_countries <- setdiff(all_countries, c("", NA))
+  
+  for (ctry in all_countries) {
+    
+    col_name <- paste0("terr_", tolower(ctry))
+    
+    dt[, (col_name) :=
+              as.integer(
+              terr != eu_inc_eea &
+              terr != eu_ex_eea &
+              grepl(paste0("(^|,)", ctry, "(,|$)"), terr))]
+  }
+  
+  dt <- dt[, territorial_scope := NULL]
+  dt <- dt[, terr := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Created At ----
@@ -249,7 +266,8 @@ for(subfile in rel_files){
   # Bind Cleaned Data ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   out_data <- rbind(out_data,
-                    dt)
+                    dt,
+                    fill = TRUE)
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Clean Environment ----
@@ -270,7 +288,7 @@ rm(dt)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Upload Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("DATA CLEANING: ", plat, " ", date_out, " - EXPORT"))
+print(paste0("SOR CLEANING: ", plat, " ", date_out, " - EXPORT"))
 
 # Check for folder
 file_path <- paste0(out_clean_path, date_out)
@@ -279,10 +297,10 @@ if(!dir.exists(file_path)) {
   dir.create(paste0(out_clean_path, date_out))
 }
 
-# Export
-write.csv(out_data, file = paste0(out_clean_path, date_out, "/", plat,".csv"))
+# Export as Parquet File
+write_parquet(out_data, paste0(out_clean_path, date_out, "/", plat,".parquet"))
 
-print(paste0("DATA CLEANING: ", plat, " ", date_out, " - EXPORT COMPLETE"))
+print(paste0("SOR CLEANING: ", plat, " ", date_out, " - EXPORT COMPLETE"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean-Up ----
