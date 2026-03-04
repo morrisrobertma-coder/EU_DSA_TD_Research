@@ -265,9 +265,9 @@ cols_remap <- as.data.table(tibble::tribble(
   "y_aut_detection","automated_detection_yes",
   
   # decision
-  "f_aut_decision","automated_detecision_fully",
-  "p_aut_decision","automated_detecision_partially",
-  "n_aut_decision","automated_detecision_not_automated",
+  "f_aut_decision","automated_decision_fully",
+  "p_aut_decision","automated_decision_partially",
+  "n_aut_decision","automated_decision_not_automated",
   
   # content type
   "ap_content_type","content_type_app",
@@ -278,6 +278,7 @@ cols_remap <- as.data.table(tibble::tribble(
   "t_content_type","content_type_text",
   "v_content_type","content_type_video",
   "o_content_type","content_type_other",
+  "m_content_type","content_type_multiple",
   "NA_content_type","content_type_NA",
   
   # content language

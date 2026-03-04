@@ -127,6 +127,11 @@ for(subfile in rel_files){
   dt <- dt[map_cont, cont_type := i.abkurzung, on = .(cont_type = des)][
     , content_type := NULL]
   
+  # adjust for multiple content types
+  # lose some granularity in this adjustment but not often used
+  dt <- dt[, cont_type := ifelse(!(cont_type %in% map_cont[, abkurzung]),
+                                 "m", cont_type)]
+  
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Content Language ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -284,6 +289,7 @@ for(subfile in rel_files){
 # Remove Unwanted Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 rm(dt)
+gc()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Upload Data ----

@@ -5,3 +5,6 @@
 
 # ignore all unzipped csv files
 *.csv
+
+# ignore all parquet data files
+*.parquet

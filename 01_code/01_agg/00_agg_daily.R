@@ -36,9 +36,9 @@ for(analysis_date in rel_files){
   # Territory
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Frequency table per territory stated
-  agg_2 <- dt[,.(amount = .N), by="terr"]
-  agg_2 <- dcast(agg_2, 0 ~terr, value.var="amount")[,-1]
-  colnames(agg_2) <- paste0(colnames(agg_2),"_terr")
+  #agg_2 <- dt[,.(amount = .N), by="terr"]
+  #agg_2 <- dcast(agg_2, 0 ~terr, value.var="amount")[,-1]
+  #colnames(agg_2) <- paste0(colnames(agg_2),"_terr")
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Content Date and Application Date
@@ -107,7 +107,7 @@ for(analysis_date in rel_files){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   out_ind <- data.table("platform" = paste0(plat))[, date := paste0(analysis_date)]
   setcolorder(out_ind, neworder = c("date","platform"))
-  out_ind <- cbind(out_ind, agg_1, agg_2, dt_time, agg_3, agg_4, agg_5, agg_6, 
+  out_ind <- cbind(out_ind, agg_1, dt_time, agg_3, agg_4, agg_5, agg_6, 
                    agg_7, agg_8, agg_9)
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -122,7 +122,7 @@ for(analysis_date in rel_files){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Clean Environment ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  rm(dt, agg_1, agg_2, agg_3, agg_4, agg_5, agg_6, agg_7, agg_8, agg_9, dt_content_max, dt_content_min, dt_time)
+  rm(dt, agg_1, agg_3, agg_4, agg_5, agg_6, agg_7, agg_8, agg_9, dt_content_max, dt_content_min, dt_time)
   gc()
   
   }
