@@ -23,11 +23,14 @@ out_x <- paste0(out_per_platform,"07_x/")
 # Data Quality
 out_dq_path <- paste0(inp, "04_dq/")
 
+# Qualitative Analysis
+out_qual_path <- paste0(inp, "05_qual/")
+
 # Data Cleaning
-out_clean_path <- paste0(inp, "05_clean/")
+out_clean_path <- paste0(inp, "06_clean/")
 
 # Aggregation
-out_agg_daily_path <- paste0(inp, "06_aggregated/00_daily/")
+out_agg_daily_path <- paste0(inp, "07_aggregated/00_daily/")
 
 ### Platforms ----
 # Company/Platform Name Mapping
@@ -247,8 +250,10 @@ cols_to_keep <- c("platform_name","territorial_scope","created_at",
 # with 'cols_to_keep_above'
 cols_order <- c('p_name','date','time','content_d',
                 'app_d','aut_det','aut_dec','cont_type',
-                'cont_lang','source','cat','cat_spec',
-                'des_ground','incomp_c_ground','incomp_c_illegal',
+                'cont_lang','source','cat','cat_spec','cat_spec_other',
+                'des_ground','des_fact','illegal_c_ground', 'illegal_c_ex',
+                'incomp_c_ground','incomp_c_ex',
+                'incomp_c_illegal',
                 'des_vis','des_vis_other','des_vis_end_date',
                 'des_mon','des_mon_other','des_mon_end_date',
                 'des_prov','des_prov_end_date','des_acc',

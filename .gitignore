@@ -7,4 +7,4 @@
 *.csv
 
 # ignore all parquet data files
-*.parquet
+*.parquet 

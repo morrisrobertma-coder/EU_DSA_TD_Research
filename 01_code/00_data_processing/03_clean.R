@@ -13,6 +13,16 @@ rel_files <- list.files(paste0(map_platform[platform == plat, output], date_out)
 # Define Output
 out_data <- data.table()
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Import Qualitative Analysis Results ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+dt_qual <- as.data.table(fread(file = paste0(out_qual_path, date_out, "/qual_analysis.csv")))
+
+# filter by platform
+# cut to statement and q_id
+dt_qual <- dt_qual[platform == plat][
+  ,.(statement, q, q_id)]
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -39,10 +49,9 @@ for(subfile in rel_files){
   ## Drop Unnecessary Columns ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   drop_cols <- c("uuid", "account_type", "decision_ground_reference_url",
-                 "illegal_content_legal_ground","illegal_content_explanation",
-                 "incompatible_content_explanation","category_addition",
-                 "category_specification_other","content_type_other",
-                 "content_id_ean","decision_facts","source_identity",
+                 "category_addition",
+                 "content_type_other",
+                 "content_id_ean","source_identity",
                  "platform_uid")
   
   dt <- dt[, (drop_cols) := NULL]
@@ -163,16 +172,148 @@ for(subfile in rel_files){
     , category_specification := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  ## Category Specification Other ----
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  dt <- dt[, cat_spec_other := tolower(category_specification_other)]
+  
+  # find NA frequency
+  if (nrow(dt[!(is.na(cat_spec_other))]) != 0){
+    
+    # cut-down qualitative table
+    dt_qual_cut <- dt_qual[q == 'category_specification_other'][
+      ,.(statement, q_id)]
+    
+    # merge qualitative statement id
+    dt <- merge(dt, dt_qual_cut, by.x = 'cat_spec_other',
+                by.y = 'statement',
+                all.x = T)
+    
+    dt <- dt[, cat_spec_other := q_id][, q_id := NULL]
+    
+  } 
+  
+  dt <- dt [, category_specification_other := NULL]
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Decision Ground ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   dt <- dt[map_des_ground, des_ground := i.abkurzung, on = .(decision_ground = des)][
     , decision_ground := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  ## Decision Facts ----
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  dt <- dt[, des_fact := tolower(decision_facts)]
+  
+  # find NA frequency
+  if (nrow(dt[!(is.na(des_fact))]) != 0){
+    
+    # cut-down qualitative table
+    dt_qual_cut <- dt_qual[q == 'decision_facts'][
+      ,.(statement, q_id)]
+    
+    # merge qualitative statement id
+    dt <- merge(dt, dt_qual_cut, by.x = 'decision_facts',
+                by.y = 'statement',
+                all.x = T)
+    
+    dt <- dt[, des_fact := q_id][, q_id := NULL]
+    
+  } 
+  
+  dt <- dt [, decision_facts := NULL]
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  ## Illegal Content Legal Ground ----
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  dt <- dt[, illegal_c_ground := tolower(illegal_content_legal_ground)]
+  
+  # find NA frequency
+  if (nrow(dt[!(is.na(illegal_c_ground))]) != 0){
+    
+    # cut-down qualitative table
+    dt_qual_cut <- dt_qual[q == 'illegal_content_legal_ground'][
+      ,.(statement, q_id)]
+    
+    # merge qualitative statement id
+    dt <- merge(dt, dt_qual_cut, by.x = 'illegal_c_ground',
+                by.y = 'statement',
+                all.x = T)
+    
+    dt <- dt[, illegal_c_ground := q_id][, q_id := NULL]
+    
+  } 
+  
+  dt <- dt [, illegal_content_legal_ground := NULL]
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  ## Illegal Content Explanation ----
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  dt <- dt[, illegal_c_ex := tolower(illegal_content_explanation)]
+  
+  # find NA frequency
+  if (nrow(dt[!(is.na(illegal_c_ex))]) != 0){
+    
+    # cut-down qualitative table
+    dt_qual_cut <- dt_qual[q == 'illegal_content_explanation'][
+      ,.(statement, q_id)]
+    
+    # merge qualitative statement id
+    dt <- merge(dt, dt_qual_cut, by.x = 'illegal_c_ex',
+                by.y = 'statement',
+                all.x = T)
+    
+    dt <- dt[, illegal_c_ex := q_id][, q_id := NULL]
+    
+  } 
+  
+  dt <- dt [, illegal_content_explanation := NULL]
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Incompatible Content Ground ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, incomp_c_ground := tolower(incompatible_content_ground)][
-    , incompatible_content_ground := NULL]
+  dt <- dt[, incomp_c_ground := tolower(incompatible_content_ground)]
+  
+  # find NA frequency
+  if (nrow(dt[!(is.na(incomp_c_ground))]) != 0){
+    
+    # cut-down qualitative table
+    dt_qual_cut <- dt_qual[q == 'incompatible_content_ground'][
+      ,.(statement, q_id)]
+    
+    # merge qualitative statement id
+    dt <- merge(dt, dt_qual_cut, by.x = 'incomp_c_ground',
+                by.y = 'statement',
+                all.x = T)
+    
+    dt <- dt[, incomp_c_ground := q_id][, q_id := NULL]
+    
+  } 
+  
+  dt <- dt [, incompatible_content_ground := NULL]
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  ## Incompatible Content Explanation ----
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  dt <- dt[, incomp_c_ex := tolower(incompatible_content_explanation)]
+  
+  # find NA frequency
+  if (nrow(dt[!(is.na(incomp_c_ex))]) != 0){
+    
+    # cut-down qualitative table
+    dt_qual_cut <- dt_qual[q == 'incompatible_content_explanation'][
+      ,.(statement, q_id)]
+    
+    # merge qualitative statement id
+    dt <- merge(dt, dt_qual_cut, by.x = 'incomp_c_ex',
+                by.y = 'statement',
+                all.x = T)
+    
+    dt <- dt[, incomp_c_ex := q_id][, q_id := NULL]
+    
+  } 
+  
+  dt <- dt [, incompatible_content_explanation := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Incompatible Content Illegal ----
@@ -288,7 +429,7 @@ for(subfile in rel_files){
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Remove Unwanted Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-rm(dt)
+rm(dt, dt_qual, dt_qual_cut)
 gc()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

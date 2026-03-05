@@ -5,7 +5,7 @@
 # Input: Daily Global Files in '00_sor_global_zipped' folder.
 # Output: Individual Platform CSVs in '03_sor_platforms' folder.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("GLOBAL DATA PROCESSING: ", date_out, " START"))
+print(paste0("GLOBAL DATA PROCESSING: ", date_out, " - START"))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Initialization
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -34,6 +34,7 @@ unzip(paste0(zip_in, global_file_process), exdir = paste0(zip_mid_out, date_out)
 zip_inside_zip <- list.files(paste0(zip_mid_out, date_out))
 
 for(file in zip_inside_zip){
+  print(paste0("GLOBAL DATA PROCESSING: ", date_out, " : SUBFILE ", file," - START"))
   
   # unzip file 
   unzip(paste0(zip_mid_out, date_out,"/", file), exdir = paste0(zip_out, date_out))
@@ -48,6 +49,7 @@ for(file in zip_inside_zip){
   # Import CSVs
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   for(file_csv in files_csv){
+    print(paste0("GLOBAL DATA PROCESSING: ", date_out, " : SUBFILE CSV ", file_csv ," - START"))
     
     # import data
     dt <- fread(paste0(zip_out, date_out,"/", file_csv))
@@ -79,9 +81,18 @@ for(file in zip_inside_zip){
     # remove file
     file.remove(paste0(zip_out, date_out,"/", file_csv))
     
+    print(paste0("GLOBAL DATA PROCESSING: ", date_out, " : SUBFILE CSV ", file_csv ," - END"))
+    
   }
+  
+  print(paste0("GLOBAL DATA PROCESSING: ", date_out, " : SUBFILE ", file," - END"))
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("GLOBAL DATA PROCESSING: ", date_out, " END"))
+# Clean Up
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+gc()
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+print(paste0("GLOBAL DATA PROCESSING: ", date_out, " - END"))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
