@@ -4,8 +4,12 @@
 # Input: Raw SOR Data.
 # Output: Clean SOR Data
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("SOR CLEANING: ", plat, " ", date_out))
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run per platform
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+for(plat in map_platform[, platform]){
+
+print(paste0("SOR CLEANING: ", plat, " ", date_out, "START AT ", Sys.time()))
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Identify Relevant Files ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 rel_files <- list.files(paste0(map_platform[platform == plat, output], date_out))
@@ -32,7 +36,7 @@ for(subfile in rel_files){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Output Progress ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  print(paste0("SOR CLEANING: ", plat, " ", date_out, ". File = ", subfile))
+  print(paste0("SOR CLEANING: ", plat, " ", date_out, ". File = ", subfile, " START AT ", Sys.time()))
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Import Data ----
@@ -331,6 +335,9 @@ for(subfile in rel_files){
     gsub('"', "", x)
   })
   
+  # empty cell format
+  dt <- dt[, des_vis := ifelse(des_vis == '', NA, des_vis)]
+  
   dt <- dt[map_des_vis, des_vis := i.abkurzung, on = .(des_vis = des)][
     , decision_visibility := NULL]
   
@@ -355,6 +362,9 @@ for(subfile in rel_files){
     x <- sub("\\]$", "", x)
     gsub('"', "", x)
   })
+  
+  # empty cell format
+  dt <- dt[, des_mon := ifelse(des_mon == '', NA, des_mon)]
   
   dt <- dt[map_des_mon, des_mon := i.abkurzung, on = .(des_mon = des)][
     , decision_monetary := NULL]
@@ -381,6 +391,9 @@ for(subfile in rel_files){
     gsub('"', "", x)
   })
   
+  # empty cell format
+  dt <- dt[, des_prov := ifelse(des_prov == '', NA, des_prov)]
+  
   dt <- dt[map_des_prov, des_prov := i.abkurzung, on = .(des_prov = des)][
     , decision_provision := NULL]
   
@@ -393,6 +406,8 @@ for(subfile in rel_files){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Decision Account ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  dt <- dt[, decision_account := ifelse(decision_account == '', NA, decision_account)]
+  
   dt <- dt[map_des_acc, des_acc := i.abkurzung, on = .(decision_account = des)][
     , decision_account := NULL]
   
@@ -423,7 +438,7 @@ for(subfile in rel_files){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Output Progress ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  print(paste0("SOR CLEANING: ", plat, " ", date_out, ". File = ", subfile, " FINISHED"))
+  print(paste0("SOR CLEANING: ", plat, " ", date_out, ". File = ", subfile, " FINISHED AT ", Sys.time()))
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -435,7 +450,7 @@ gc()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Upload Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("SOR CLEANING: ", plat, " ", date_out, " - EXPORT"))
+print(paste0("SOR CLEANING: ", plat, " ", date_out, " - EXPORT AT ", Sys.time()))
 
 # Check for folder
 file_path <- paste0(out_clean_path, date_out)
@@ -447,10 +462,12 @@ if(!dir.exists(file_path)) {
 # Export as Parquet File
 write_parquet(out_data, paste0(out_clean_path, date_out, "/", plat,".parquet"))
 
-print(paste0("SOR CLEANING: ", plat, " ", date_out, " - EXPORT COMPLETE"))
+print(paste0("SOR CLEANING: ", plat, " ", date_out, " - EXPORT COMPLETE AT ", Sys.time()))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean-Up ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 rm(out_data)
 gc()
+
+}

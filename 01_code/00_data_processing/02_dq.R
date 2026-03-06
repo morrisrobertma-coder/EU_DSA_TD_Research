@@ -4,8 +4,13 @@
 # Input: Raw SOR Data.
 # Output: Data Quality Report per platform per time-slice with basic DQ checks.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("DATA QUALITY: ", plat, " ", date_out))
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Run per platform
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+for(plat in map_platform[, platform]){
+
+print(paste0("DATA QUALITY: ", plat, " ", date_out, " START AT ", Sys.time()))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Identify Relevant Files
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 rel_files <- list.files(paste0(map_platform[platform == plat, output], date_out))
@@ -31,7 +36,7 @@ table_dq <- function(check, t, v){
 # loop through files
 for(ind_file in rel_files){
   
-  print(paste0("DATA QUALITY: ", plat, " ", date_out, " FILE - ", ind_file, " - START"))
+  print(paste0("DATA QUALITY: ", plat, " ", date_out, " FILE - ", ind_file, " - START AT ", Sys.time()))
   
   # import data
   dt_dq <- as.data.table(read.csv(paste0(map_platform[platform == plat, output], date_out, "/", ind_file)))
@@ -119,7 +124,7 @@ for(ind_file in rel_files){
   rm(dt_dq)
   rm(dq_vars)
   
-  print(paste0("DATA QUALITY: ", plat, " ", date_out, " FILE - ", ind_file, " - END"))
+  print(paste0("DATA QUALITY: ", plat, " ", date_out, " FILE - ", ind_file, " - END AT ", Sys.time()))
   
 }
 
@@ -155,7 +160,7 @@ out_dq <- out_dq[, check_plat_uuids := ifelse(number_unique_platform_uuids != nu
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Export Data Quality File
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("DATA QUALITY: ", plat, " ", date_out, " - EXPORT"))
+print(paste0("DATA QUALITY: ", plat, " ", date_out, " - EXPORT AT ", Sys.time()))
 
 # Check for folder
 file_path <- paste0(out_dq_path, date_out)
@@ -168,9 +173,11 @@ if(!dir.exists(file_path)) {
 write.csv(out_dq, file = paste0(out_dq_path, date_out, "/", plat,".csv"),
           row.names = FALSE)
 
-print(paste0("DATA QUALITY: ", plat, " ", date_out, " - EXPORT COMPLETE"))
+print(paste0("DATA QUALITY: ", plat, " ", date_out, " - EXPORT COMPLETE AT ", Sys.time()))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 gc()
+
+}

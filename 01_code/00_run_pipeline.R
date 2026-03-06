@@ -58,9 +58,7 @@ for(i in seq_along(dates)){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Run Platform Level Data Quality
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  for(plat in map_platform[, platform]){
   source(paste0(inp_code,"00_data_processing/02_dq.R"))
-  }
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Run Qualitative Analysis
@@ -70,25 +68,21 @@ for(i in seq_along(dates)){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Run Data Cleaning
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  for(plat in map_platform[, platform]){
-    source(paste0(inp_code,"00_data_processing/03_clean.R"))
-  }
+  source(paste0(inp_code,"00_data_processing/03_clean.R"))
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Run Quantitative Analysis Pipeline ----
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Daily Analysis 
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  source(paste0(inp_code,"02_quant/00_agg_daily.R"))
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Run Upstream Data Deletion
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  #source(paste0(inp_code,"00_data_processing/04_upstream_clean.R"))
+  source(paste0(inp_code,"00_data_processing/04_upstream_clean.R"))
   
 }
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Run Quantitative Analysis Pipeline ----
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Daily Analysis 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
-source(paste0(inp_code,"01_agg/00_agg_daily.R"))
-
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean-Up ----

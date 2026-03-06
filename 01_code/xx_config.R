@@ -1,6 +1,6 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # xx_config ----
-# Purpose of Script: Load important definitions.
+# Purpose of Script: Load important definitions and input/output paths.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Input/Output Directions ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -259,6 +259,13 @@ cols_order <- c('p_name','date','time','content_d',
                 'des_prov','des_prov_end_date','des_acc',
                 'des_acc_end_date')
 
+# Quantitative Columns
+# only columns that will be counted/aggregated on a daily basis
+quant_cols <- c('date','content_d','app_d','aut_det','aut_dec',
+                'cont_type','cont_lang','source','cat','cat_spec',
+                'des_ground','des_vis','des_mon','des_prov',
+                'des_acc')
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Column Mapping ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -274,6 +281,15 @@ cols_remap <- as.data.table(tibble::tribble(
   "p_aut_decision","automated_decision_partially",
   "n_aut_decision","automated_decision_not_automated",
   
+  # content language
+  "NA_content_language","content_language_NA",
+  
+  # source type
+  "a16_source","source_a16",
+  "tf_source","source_trusted_flagger",
+  "o_source","source_other_notification",
+  "v_source","source_voluntary",
+  
   # content type
   "ap_content_type","content_type_app",
   "au_content_type","content_type_audio",
@@ -285,15 +301,6 @@ cols_remap <- as.data.table(tibble::tribble(
   "o_content_type","content_type_other",
   "m_content_type","content_type_multiple",
   "NA_content_type","content_type_NA",
-  
-  # content language
-  "NA_content_language","content_language_NA",
-  
-  # source type
-  "a16_source","source_a16",
-  "tf_source","source_trusted_flagger",
-  "o_source","source_other_notification",
-  "v_source","source_voluntary",
   
   # content category - high level
   "aw_cat_high_level","animal_welfare",
@@ -382,7 +389,39 @@ cols_remap <- as.data.table(tibble::tribble(
   "unprod_cat_detailed","unsafe_products",
   "vioeul_cat_detailed","violation_eu_law",
   "vionatl_cat_detailed","violation_national_law",
-  "NA_cat_detailed","detailed_category_NA"))
+  "NA_cat_detailed","detailed_category_NA",
+  
+  # decision ground
+  "illc_des_ground","illegal_content",
+  "incpc_des_ground","incompatible_content",
+  
+  # decision visibility
+  "cr_des_vis", "content_removed",
+  "dis_des_vis", "content_disabled",
+  "dem_des_vis", "content_demoted",
+  "ar_des_vis", "content_age_restricted",
+  "ir_des_vis", "content_interaction_restricted",
+  "lab_des_vis", "content_labelled",
+  "o_des_vis", "content_visibility_other",
+  "NA_des_vis", "content_decision_NA",
+  
+  # decision provision
+  "ps_des_prov", "service_partially_suspended",
+  "ts_des_prov", "service_totally_suspended",
+  "pt_des_prov", "service_partially_terminated",
+  "tt_des_prov", "service_totally_terminated",
+  "NA_des_prov", "service_decision_NA",
+  
+  # decision monetary
+  "ms_des_mon","monetary_account_suspension",
+  "mt_des_mon","monetary_account_termination",
+  "o_des_mon","monetary_account_other",
+  "NA_des_mon","monetary_decision_NA",
+  
+  # decision account
+  "as_des_acc","account_suspended",
+  "at_des_acc","account_terminated",
+  "NA_des_acc","account_decision_NA"))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # End

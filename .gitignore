@@ -8,3 +8,6 @@
 
 # ignore all parquet data files
 *.parquet 
+
+# ignore text files for notes
+*.txt

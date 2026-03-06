@@ -9,7 +9,7 @@ out_all <- data.table()
 
 # Run for each available platform 
 for(plat in map_platform[, platform]){
-print(paste0("QUALITATIVE ANALYSIS: ", plat, " - ", date_out, " - START"))
+print(paste0("QUALITATIVE ANALYSIS: ", plat, " - ", date_out, " - START AT ", Sys.time()))
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Identify Relevant Files
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -118,14 +118,14 @@ print(paste0("QUALITATIVE ANALYSIS: ", plat, " - ", date_out, " - START"))
   out_all <- rbind(out_all,
                    out_qual)
   
-  print(paste0("QUALITATIVE ANALYSIS: ", plat, " - ", date_out, " - FINISHED"))
+  print(paste0("QUALITATIVE ANALYSIS: ", plat, " - ", date_out, " - FINISHED AT ", Sys.time()))
 
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Export Qualitative Analysis File
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("QUALITATIVE ANALYSIS: ", date_out, " - EXPORT"))
+print(paste0("QUALITATIVE ANALYSIS: ", date_out, " - EXPORT AT ", Sys.time()))
 
 # Check for folder
 file_path <- paste0(out_qual_path, date_out)
@@ -138,7 +138,7 @@ if(!dir.exists(file_path)) {
 write.csv(out_all, file = paste0(out_qual_path, date_out, "/qual_analysis.csv"),
           row.names = FALSE)
 
-print(paste0("QUALITATIVE ANALYSIS: ", date_out, " - EXPORT COMPLETE"))
+print(paste0("QUALITATIVE ANALYSIS: ", date_out, " - EXPORT COMPLETE AT ", Sys.time()))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean
