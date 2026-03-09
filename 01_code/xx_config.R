@@ -32,6 +32,9 @@ out_clean_path <- paste0(inp, "06_clean/")
 # Aggregation
 out_agg_daily_path <- paste0(inp, "07_aggregated/00_daily/")
 
+# Collection
+out_collection <- paste0(inp, "08_collected/")
+
 ### Platforms ----
 # Company/Platform Name Mapping
 map_platform <- as.data.table(tibble::tribble(

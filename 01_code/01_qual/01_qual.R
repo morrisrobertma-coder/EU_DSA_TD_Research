@@ -18,6 +18,8 @@ print(paste0("QUALITATIVE ANALYSIS: ", plat, " - ", date_out, " - START AT ", Sy
   # Define Qual Table
   out_qual <- data.table(q = '',
                          statement = '')
+  
+  if(length(rel_files) > 0){
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Perform Qualitative Analysis
@@ -120,6 +122,7 @@ print(paste0("QUALITATIVE ANALYSIS: ", plat, " - ", date_out, " - START AT ", Sy
   
   print(paste0("QUALITATIVE ANALYSIS: ", plat, " - ", date_out, " - FINISHED AT ", Sys.time()))
 
+  }
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -11,3 +11,6 @@
 
 # ignore text files for notes
 *.txt
+
+# ignore xlsx files for research
+*.xlsx 

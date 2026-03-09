@@ -209,7 +209,7 @@ min_date <- min(out_data$content_date_earliest)
 max_date <- max(out_data$content_date_latest)
 
 # format all output
-out_all <- data.table(date = '2026-02-16',
+out_all <- data.table(date = date_out,
                       platform = 'all',
                       content_date_earliest = min_date,
                       content_date_latest = max_date,

@@ -15,6 +15,7 @@ print(paste0("DATA QUALITY: ", plat, " ", date_out, " START AT ", Sys.time()))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 rel_files <- list.files(paste0(map_platform[platform == plat, output], date_out))
 
+if(length(rel_files) > 0){
 # Define DQ Table
 out_dq <- data.table()
 
@@ -180,4 +181,5 @@ print(paste0("DATA QUALITY: ", plat, " ", date_out, " - EXPORT COMPLETE AT ", Sy
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 gc()
 
+}
 }
