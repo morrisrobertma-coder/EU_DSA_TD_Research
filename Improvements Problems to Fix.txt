@@ -1,29 +1,9 @@
 Problems to fix in data pipeline
 
-RESOLVED
-- TikTok - There is a V1_terr column - resolved
-- Youtube - Territory column is a mess - resolved
-- Youtube data - more than one content type has been chosen in 'content_type'
-  category. Need to think about a way to capture this - resolved
-- Incompatible_content_ground - contains interesting information for youtube. Ok, 
-  This is captured in the clean data. I have kept this but I haven't done it 
-  in the aggregation file yet - resolved
-- For TikTok - incompatible content explanation could be a useful field to look at - solved in qualitative analysis
-
-ONGOING
-- Problems with columns des_vis, des_mon, des_prob when column in '' in cleaning 
-step. Need to change to NA to capture in analysis correctly.
+RESOLVED 
 
 
-- I am losing in the cleaned data - when content type = OTHER, this is explained in
-- content_type_other. This is not useful for most platforms and 
-- barely useful for youtube. 
-
-- Check that the column map_cat_spec is being populated correctly. I believe TikTok
-- is using it a lot but it hasn't come through in cleaned data - perhaps incorrect statement by me
-
-- For snapchat - category specification and category specification other are useful fields to look at
-
+TO RESOLVE
 
 
 
