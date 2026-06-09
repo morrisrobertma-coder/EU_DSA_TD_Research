@@ -4,28 +4,43 @@
 # Input: Raw SOR Data.
 # Output: Clean SOR Data
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Run per platform
+# Run per Platform/Date
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-for(plat in map_platform[, platform]){
+print(paste0("SOR CLEANING: ", extr_plat, " ", extr_date, " - START AT: ", Sys.time()))
 
-print(paste0("SOR CLEANING: ", plat, " ", date_out, "START AT ", Sys.time()))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Identify Relevant Files ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-rel_files <- list.files(paste0(map_platform[platform == plat, output], date_out))
+rel_files <- list.files(paste0(map_platform[platform == extr_plat, output], extr_date))
 
-# Define Output
-out_data <- data.table()
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Set Up Output File ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Check for folder
+file_path <- paste0(out_clean_path, extr_date, "-", extr_plat)
+
+if(!dir.exists(file_path)) {
+  dir.create(paste0(out_clean_path, extr_date, "-", extr_plat))
+}
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Import Qualitative Analysis Results ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-dt_qual <- as.data.table(fread(file = paste0(out_qual_path, date_out, "/qual_analysis.csv")))
+dt_qual <- as.data.table(fread(file = paste0(out_qual_path, extr_date, "/",
+                                             extr_plat,"_qual_analysis.csv")))
 
 # filter by platform
 # cut to statement and q_id
-dt_qual <- dt_qual[platform == plat][
+dt_qual <- dt_qual[platform == extr_plat][
   ,.(statement, q, q_id)]
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+# Assign Extraction Columns to Drop ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+drop_cols <- c("uuid", "account_type", "decision_ground_reference_url",
+               "category_addition",
+               "content_type_other","source_identity",
+               "platform_uid")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean Data ----
@@ -36,29 +51,18 @@ for(subfile in rel_files){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Output Progress ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  print(paste0("SOR CLEANING: ", plat, " ", date_out, ". File = ", subfile, " START AT ", Sys.time()))
+  print(paste0("SOR CLEANING: ", extr_plat, " ", extr_date, ". File = ", subfile, " - START AT: ", Sys.time()))
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Import Data ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- fread(file = paste0(paste0(map_platform[platform == plat, output], date_out, "/", subfile)))
+  dt <- fread(file = paste0(paste0(map_platform[platform == extr_plat, output], extr_date, "/", subfile)),
+              drop = drop_cols)
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Clean ----
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  # Remove V1
-  dt <- dt[, V1 := NULL]
-  
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  ## Drop Unnecessary Columns ----
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  drop_cols <- c("uuid", "account_type", "decision_ground_reference_url",
-                 "category_addition",
-                 "content_type_other",
-                 "content_id_ean","source_identity",
-                 "platform_uid")
-  
-  dt <- dt[, (drop_cols) := NULL]
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  if(nrow(dt) > 0){
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Platform Name ----
@@ -424,50 +428,25 @@ for(subfile in rel_files){
   setcolorder(dt, neworder = cols_order)
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Bind Cleaned Data ----
+  # Export ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  out_data <- rbind(out_data,
-                    dt,
-                    fill = TRUE)
+  write_parquet(dt, paste0(out_clean_path, extr_date, "-", extr_plat, "/", subfile ,".parquet"))
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ## Clean Environment ----
+  ## Clean ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  gc()
+  rm(dt)
+  
+  }
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Output Progress ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  print(paste0("SOR CLEANING: ", plat, " ", date_out, ". File = ", subfile, " FINISHED AT ", Sys.time()))
-}
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Remove Unwanted Data ----
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-rm(dt, dt_qual, dt_qual_cut)
-gc()
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Upload Data ----
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("SOR CLEANING: ", plat, " ", date_out, " - EXPORT AT ", Sys.time()))
-
-# Check for folder
-file_path <- paste0(out_clean_path, date_out)
-
-if(!dir.exists(file_path)) {
-  dir.create(paste0(out_clean_path, date_out))
-}
-
-# Export as Parquet File
-write_parquet(out_data, paste0(out_clean_path, date_out, "/", plat,".parquet"))
-
-print(paste0("SOR CLEANING: ", plat, " ", date_out, " - EXPORT COMPLETE AT ", Sys.time()))
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Clean-Up ----
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-rm(out_data)
-gc()
+  print(paste0("SOR CLEANING: ", extr_plat, " ", extr_date, ". File = ", subfile, " - FINISHED AT: ", Sys.time()))
 
 }
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Clean Up ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+rm(dt_qual, dt_qual_cut)

@@ -6,6 +6,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ### Folder Structure ----
 # In/Out Path
+global <- c("00_sor_global_zipped/")
 zip_in <- paste0(inp, "00_sor_global_zipped/")
 zip_mid_out <- paste0(inp, "01_sor_global_unzipped/")
 zip_out <- paste0(inp, "02_sor_global_ununzipped/")
@@ -29,8 +30,11 @@ out_qual_path <- paste0(inp, "05_qual/")
 # Data Cleaning
 out_clean_path <- paste0(inp, "06_clean/")
 
-# Aggregation
-out_agg_daily_path <- paste0(inp, "07_aggregated/00_daily/")
+# RQ1
+out_rq1 <- paste0(inp, "07_rq1/")
+
+# RQ2
+out_rq2 <- paste0(inp, "08_rq2/")
 
 # Collection
 out_collection <- paste0(inp, "08_collected/")
@@ -262,12 +266,20 @@ cols_order <- c('p_name','date','time','content_d',
                 'des_prov','des_prov_end_date','des_acc',
                 'des_acc_end_date')
 
-# Quantitative Columns
-# only columns that will be counted/aggregated on a daily basis
-quant_cols <- c('date','content_d','app_d','aut_det','aut_dec',
-                'cont_type','cont_lang','source','cat','cat_spec',
-                'des_ground','des_vis','des_mon','des_prov',
-                'des_acc')
+# RQ Columns
+### RQ1
+rq1_cols <- c('date','content_d','app_d','aut_det','aut_dec',
+              'cont_type','cont_lang','source','cat','cat_spec',
+              'des_ground','des_vis','des_mon','des_prov',
+              'des_acc')
+
+### RQ2
+rq2_cols <- c('date','cont_type','source','aut_det','aut_dec',
+              'des_vis','des_vis_other','des_vis_end_date',
+              'des_mon','des_mon_other','des_mon_end_date',
+              'des_prov','des_prov_end_date',
+              'des_acc','des_acc_end_date','des_fact',
+              'incomp_c_ground','incomp_c_ex')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Column Mapping ----

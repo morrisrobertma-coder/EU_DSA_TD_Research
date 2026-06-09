@@ -7,74 +7,71 @@
 # Define Full Output
 out_all <- data.table()
 
-# Run for each available platform 
-for(plat in map_platform[, platform]){
-print(paste0("QUALITATIVE ANALYSIS: ", plat, " - ", date_out, " - START AT ", Sys.time()))
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Identify Relevant Files
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  rel_files <- list.files(paste0(map_platform[platform == plat, output], date_out))
+# Run for Platform/Date 
+print(paste0("QUALITATIVE ANALYSIS: ", extr_plat, " - ", extr_date, " - START AT ", Sys.time()))
 
-  # Define Qual Table
-  out_qual <- data.table(q = '',
-                         statement = '')
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Identify Relevant Files
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+rel_files <- list.files(paste0(map_platform[platform == extr_plat, output], extr_date))
+
+# Define Qual Table
+out_qual <- data.table(q = '',
+                       statement = '')
   
-  if(length(rel_files) > 0){
-
+if(length(rel_files) > 0){
+  
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Perform Qualitative Analysis
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # loop through files
   for(ind_file in rel_files){
-  
-    # import data
-    dt <- as.data.table(read.csv(paste0(map_platform[platform == plat, output], date_out, "/", ind_file)))
-  
-    # remove index
-    dt <- dt[, X := NULL]
-  
+    
+    # print progress
+    print(paste0("QUALITATIVE ANALYSIS: ", extr_plat, " - ", extr_date, " - ", ind_file, " - START AT ", Sys.time()))
+    
     # cut down to columns of interest
     cols_of_interest <- c('incompatible_content_ground','incompatible_content_explanation',
                           'decision_facts','category_specification_other',
                           'illegal_content_legal_ground',
                           'illegal_content_explanation')
   
-    # fix this later to just use 'dt' - copy is memory expensive
-    dt_cut <- copy(dt)[,..cols_of_interest]
-    
-    # lower all columns (some duplicates occur as random letters capitalized)
-    dt_cut <- dt_cut[, (cols_of_interest) := lapply(.SD, tolower), .SDcols = cols_of_interest]
-      
-    # clean
-    gc()
+    # import data
+    dt <- fread(paste0(map_platform[platform == extr_plat, output], extr_date, "/", ind_file),
+                select = cols_of_interest)
   
+    if(nrow(dt) > 0){
+
+    # lower all columns (some duplicates occur as random letters capitalized)
+    dt <- dt[, (cols_of_interest) := lapply(.SD, tolower), .SDcols = cols_of_interest]
+      
     # incompatible content ground
-    qual_1 <- dt_cut[,.(freq = .N), by = "incompatible_content_ground"][
+    qual_1 <- dt[,.(freq = .N), by = "incompatible_content_ground"][
       , q := "incompatible_content_ground"]
     colnames(qual_1) <- c('statement','freq','q')
   
     # incompatible content explanation
-    qual_2 <- dt_cut[,.(freq = .N), by = "incompatible_content_explanation"][
+    qual_2 <- dt[,.(freq = .N), by = "incompatible_content_explanation"][
       , q := "incompatible_content_explanation"]
     colnames(qual_2) <- c('statement','freq','q')
   
     # decision facts
-    qual_3 <- dt_cut[,.(freq = .N), by = "decision_facts"][
+    qual_3 <- dt[,.(freq = .N), by = "decision_facts"][
       , q := "decision_facts"]
     colnames(qual_3) <- c('statement','freq','q') 
     
     # category specification other
-    qual_4 <- dt_cut[,.(freq = .N), by = "category_specification_other"][
+    qual_4 <- dt[,.(freq = .N), by = "category_specification_other"][
       , q := "category_specification_other"]
     colnames(qual_4) <- c('statement','freq','q')
     
     # illegal content legal ground
-    qual_5 <- dt_cut[,.(freq = .N), by = "illegal_content_legal_ground"][
+    qual_5 <- dt[,.(freq = .N), by = "illegal_content_legal_ground"][
       , q := "illegal_content_legal_ground"]
     colnames(qual_5) <- c('statement','freq','q')
     
     # illegal content explanation
-    qual_6 <- dt_cut[,.(freq = .N), by = "illegal_content_explanation"][
+    qual_6 <- dt[,.(freq = .N), by = "illegal_content_explanation"][
       , q := "illegal_content_explanation"]
     colnames(qual_6) <- c('statement','freq','q')
   
@@ -90,8 +87,13 @@ print(paste0("QUALITATIVE ANALYSIS: ", plat, " - ", date_out, " - START AT ", Sy
                       out,
                       by = c('q','statement'),
                       all = T)
-  
-  
+    
+    # clean
+    rm(out)
+    gc()
+    
+    print(paste0("QUALITATIVE ANALYSIS: ", extr_plat, " - ", extr_date, " - ", ind_file, " - FINISHED AT ", Sys.time()))
+    }
 }
 
   # remove empty question
@@ -107,8 +109,8 @@ print(paste0("QUALITATIVE ANALYSIS: ", plat, " - ", date_out, " - START AT ", Sy
   out_qual <- out_qual[,.(q, statement, total)]
 
   # add platform
-  out_qual <- out_qual[, platform := paste0(plat)][
-                          , date := paste0(date_out)]
+  out_qual <- out_qual[, platform := paste0(extr_plat)][
+                          , date := paste0(extr_date)]
   
   # add index
   out_qual <- out_qual[, q_id := .I]
@@ -119,36 +121,31 @@ print(paste0("QUALITATIVE ANALYSIS: ", plat, " - ", date_out, " - START AT ", Sy
   # bind all platform data
   out_all <- rbind(out_all,
                    out_qual)
-  
-  print(paste0("QUALITATIVE ANALYSIS: ", plat, " - ", date_out, " - FINISHED AT ", Sys.time()))
 
-  }
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Export Qualitative Analysis File
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("QUALITATIVE ANALYSIS: ", date_out, " - EXPORT AT ", Sys.time()))
+print(paste0("QUALITATIVE ANALYSIS: ", extr_date, " - EXPORT AT ", Sys.time()))
 
 # Check for folder
-file_path <- paste0(out_qual_path, date_out)
+file_path <- paste0(out_qual_path, extr_date)
 
 if(!dir.exists(file_path)) {
-  dir.create(paste0(out_qual_path, date_out))
+  dir.create(paste0(out_qual_path, extr_date))
 }
 
 # Export
-write.csv(out_all, file = paste0(out_qual_path, date_out, "/qual_analysis.csv"),
+fwrite(out_all, file = paste0(out_qual_path, extr_date, "/", extr_plat, "_qual_analysis.csv"),
           row.names = FALSE)
 
-print(paste0("QUALITATIVE ANALYSIS: ", date_out, " - EXPORT COMPLETE AT ", Sys.time()))
+print(paste0("QUALITATIVE ANALYSIS: ", extr_plat, " - ", extr_date, " - EXPORT COMPLETE AT ", Sys.time()))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-rm(dt_cut)
 rm(dt)
-rm(out)
 rm(out_all)
 rm(out_qual)
 rm(qual_1, qual_2, qual_3, qual_4, qual_5, qual_6)

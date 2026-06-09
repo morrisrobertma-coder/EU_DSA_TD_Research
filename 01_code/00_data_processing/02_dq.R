@@ -4,16 +4,14 @@
 # Input: Raw SOR Data.
 # Output: Data Quality Report per platform per time-slice with basic DQ checks.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Run per platform
+# Run per Platform/Date
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-for(plat in map_platform[, platform]){
-
-print(paste0("DATA QUALITY: ", plat, " ", date_out, " START AT ", Sys.time()))
+print(paste0("DATA QUALITY: ", extr_plat, " ", extr_date, " START AT ", Sys.time()))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Identify Relevant Files
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-rel_files <- list.files(paste0(map_platform[platform == plat, output], date_out))
+rel_files <- list.files(paste0(map_platform[platform == extr_plat, output], extr_date))
 
 if(length(rel_files) > 0){
 # Define DQ Table
@@ -37,22 +35,21 @@ table_dq <- function(check, t, v){
 # loop through files
 for(ind_file in rel_files){
   
-  print(paste0("DATA QUALITY: ", plat, " ", date_out, " FILE - ", ind_file, " - START AT ", Sys.time()))
+  print(paste0("DATA QUALITY: ", extr_plat, " ", extr_date, " FILE - ", ind_file, " - START AT ", Sys.time()))
   
   # import data
-  dt_dq <- as.data.table(read.csv(paste0(map_platform[platform == plat, output], date_out, "/", ind_file)))
+  dt_dq <- fread(paste0(map_platform[platform == extr_plat, output], extr_date, "/", ind_file))
   
-  # remove index
-  dt_dq <- dt_dq[, X := NULL]
-  
+  if (nrow(dt_dq) > 0){
+
   # column names
   dt_dq_cols <- colnames(dt_dq)
   
   # date
-  table_dq("0_date","date",paste0(date_out))
+  table_dq("0_date","date",paste0(extr_date))
   
   # platform
-  table_dq("1_plat","platform",paste0(plat))
+  table_dq("1_plat","platform",paste0(extr_plat))
   
   # dq file name
   table_dq("2_file","file", paste0(ind_file))
@@ -111,6 +108,7 @@ for(ind_file in rel_files){
   
   # remove dq table
   rm(dq_t)
+  gc()
   
   # bind to dq output
   out_dq <- rbind(out_dq,
@@ -125,7 +123,8 @@ for(ind_file in rel_files){
   rm(dt_dq)
   rm(dq_vars)
   
-  print(paste0("DATA QUALITY: ", plat, " ", date_out, " FILE - ", ind_file, " - END AT ", Sys.time()))
+  }
+  print(paste0("DATA QUALITY: ", extr_plat, " ", extr_date, " FILE - ", ind_file, " - END AT ", Sys.time()))
   
 }
 
@@ -161,25 +160,25 @@ out_dq <- out_dq[, check_plat_uuids := ifelse(number_unique_platform_uuids != nu
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Export Data Quality File
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("DATA QUALITY: ", plat, " ", date_out, " - EXPORT AT ", Sys.time()))
+print(paste0("DATA QUALITY: ", extr_plat, " ", extr_date, " - EXPORT AT ", Sys.time()))
 
 # Check for folder
-file_path <- paste0(out_dq_path, date_out)
+file_path <- paste0(out_dq_path, extr_date)
 
 if(!dir.exists(file_path)) {
-  dir.create(paste0(out_dq_path, date_out))
+  dir.create(paste0(out_dq_path, extr_date))
 }
 
 # Export
-write.csv(out_dq, file = paste0(out_dq_path, date_out, "/", plat,".csv"),
+fwrite(out_dq, file = paste0(out_dq_path, extr_date, "/", extr_plat,".csv"),
           row.names = FALSE)
 
-print(paste0("DATA QUALITY: ", plat, " ", date_out, " - EXPORT COMPLETE AT ", Sys.time()))
+print(paste0("DATA QUALITY: ", extr_plat, " ", extr_date, " - EXPORT COMPLETE AT ", Sys.time()))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+rm(out_dq)
 gc()
 
-}
 }

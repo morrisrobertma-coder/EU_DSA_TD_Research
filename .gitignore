@@ -17,3 +17,9 @@
 
 # map visualisation files
 *.drawio
+
+# literation folder
+02_literature/
+
+# dissertation report
+03_report/
