@@ -42,6 +42,11 @@ drop_cols <- c("uuid", "account_type", "decision_ground_reference_url",
                "content_type_other","source_identity",
                "platform_uid")
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+# Data Quality ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+out_dq_clean <- data.table()
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,7 +59,7 @@ for(subfile in rel_files){
   print(paste0("SOR CLEANING: ", extr_plat, " ", extr_date, ". File = ", subfile, " - START AT: ", Sys.time()))
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ## Import Data ----
+  ## Import Data --subfu--
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   dt <- fread(file = paste0(paste0(map_platform[platform == extr_plat, output], extr_date, "/", subfile)),
               drop = drop_cols)
@@ -173,11 +178,22 @@ for(subfile in rel_files){
   dt <- dt[map_cat, cat := i.abkurzung, on = .(category = des)][
     , category := NULL]
   
+  dt <- dt[, cat := ifelse(is.na(cat), 'historic', cat)]
+  
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Category Specification ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  dt$category_specification <- sapply(dt$category_specification,
+                                      function(x) {
+    x <- sub("^\\[", "", x)
+    x <- sub("\\]$", "", x)
+    gsub('"', "", x)
+  })
+  
   dt <- dt[map_cat_spec, cat_spec := i.abkurzung, on = .(category_specification = des)][
     , category_specification := NULL]
+  
+  dt <- dt[, cat_spec := ifelse(is.na(cat_spec), 'historic', cat_spec)]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Category Specification Other ----
@@ -221,7 +237,7 @@ for(subfile in rel_files){
       ,.(statement, q_id)]
     
     # merge qualitative statement id
-    dt <- merge(dt, dt_qual_cut, by.x = 'decision_facts',
+    dt <- merge(dt, dt_qual_cut, by.x = 'des_fact',
                 by.y = 'statement',
                 all.x = T)
     
@@ -428,6 +444,13 @@ for(subfile in rel_files){
   setcolorder(dt, neworder = cols_order)
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Data Quality ----
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  dt_dq_clean <- dt[, lapply(.SD, function(x) sum(is.na(x)))]
+  out_dq_clean <- rbind(out_dq_clean,
+                        dt_dq_clean, fill=TRUE)
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Export ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   write_parquet(dt, paste0(out_clean_path, extr_date, "-", extr_plat, "/", subfile ,".parquet"))
@@ -447,6 +470,32 @@ for(subfile in rel_files){
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Data Quality Export ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+out_dq_clean[is.na(out_dq_clean)] <- 0
+out_dq_clean <- out_dq_clean[, lapply(.SD, sum)]
+out_dq_clean <- out_dq_clean[,':='(platform = paste0(extr_plat),
+                                   date = paste0(extr_date))]
+
+setcolorder((out_dq_clean),c("platform","date"))
+
+### Export
+print(paste0("CLEANING DATA QUALITY: ", extr_plat, " ", extr_date, " - EXPORT AT ", Sys.time()))
+
+# Check for folder
+file_path <- paste0(out_dq_path, extr_date)
+
+if(!dir.exists(file_path)) {
+  dir.create(paste0(out_dq_path, extr_date))
+}
+
+# Export
+fwrite(out_dq_clean, file = paste0(out_dq_path, extr_date, "/", extr_plat,"_clean.csv"),
+       row.names = FALSE)
+
+print(paste0("CLEANING DATA QUALITY: ", extr_plat, " ", extr_date, " - EXPORT COMPLETE AT ", Sys.time()))
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean Up ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-rm(dt_qual, dt_qual_cut)
+rm(dt_qual, dt_qual_cut, out_dq_clean)

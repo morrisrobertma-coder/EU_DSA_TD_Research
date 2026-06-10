@@ -53,7 +53,7 @@ for(j in 1:nrow(out_agg_dq)){
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Upload Qualitative Data ----
+# Upload DQ Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Generate filename
 dq_data <- paste0(Sys.Date(),"_dq.parquet")

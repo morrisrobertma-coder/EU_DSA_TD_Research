@@ -36,6 +36,9 @@ out_rq1 <- paste0(inp, "07_rq1/")
 # RQ2
 out_rq2 <- paste0(inp, "08_rq2/")
 
+# RQ3
+out_rq3 <- paste0(inp, "09_rq3/")
+
 # Collection
 out_collection <- paste0(inp, "08_collected/")
 
@@ -124,7 +127,11 @@ map_cat <- as.data.table(tibble::tribble(
   "STATEMENT_CATEGORY_SCAMS_AND_FRAUD","sf",
   "STATEMENT_CATEGORY_SELF_HARM","sh",
   "STATEMENT_CATEGORY_UNSAFE_AND_PROHIBITED_PRODUCTS","upp",
-  "STATEMENT_CATEGORY_VIOLENCE","v"))
+  "STATEMENT_CATEGORY_VIOLENCE","v",
+  
+  # historic categories
+  "STATEMENT_CATEGORY_SCOPE_OF_PLATFORM_SERVICE","sops",
+  "STATEMENT_CATEGORY_PORNOGRAPHY_OR_SEXUALIZED_CONTENT","posc"))
 
 ### Category Specification ----
 map_cat_spec <- as.data.table(tibble::tribble(
@@ -196,7 +203,7 @@ map_cat_spec <- as.data.table(tibble::tribble(
   "KEYWORD_UNSAFE_PRODUCTS","unprod",
   "KEYWORD_VIOLATION_EU_LAW","vioeul",
   "KEYWORD_VIOLATION_NATIONAL_LAW","vionatl",
-  "KEYWORD_OTHER",""))
+  "KEYWORD_OTHER","o"))
 
 ### Decision Ground ----
 map_des_ground <- as.data.table(tibble::tribble(
@@ -275,11 +282,21 @@ rq1_cols <- c('date','content_d','app_d','aut_det','aut_dec',
 
 ### RQ2
 rq2_cols <- c('date','cont_type','source','aut_det','aut_dec',
+              'des_ground',
               'des_vis','des_vis_other','des_vis_end_date',
               'des_mon','des_mon_other','des_mon_end_date',
               'des_prov','des_prov_end_date',
               'des_acc','des_acc_end_date','des_fact',
               'incomp_c_ground','incomp_c_ex')
+
+### RQ3
+rq3_cols_quant <- c('date','cont_type','cat','cat_spec',
+                    'des_ground')
+
+rq3_cols_qual <- c('date','cont_type','cat_spec_other',
+                   'des_fact','illegal_c_ground','illegal_c_ex',
+                   'incomp_c_illegal',
+                   'incomp_c_ground','incomp_c_ex')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Column Mapping ----
@@ -335,6 +352,9 @@ cols_remap <- as.data.table(tibble::tribble(
   "upp_cat_high_level","unsafe_and_prohibited_products",
   "v_cat_high_level","violence",
   "NA_cat_high_level","category_NA",
+  "historic_cat_high_level","historic",
+  "posc_cat_high_level","pornographic_or_sexual_content",
+  "sops_cat_high_level","scope_of_platform_service",
   
   # content category - detail
   "ah_cat_detailed","animal_harm",
@@ -405,6 +425,7 @@ cols_remap <- as.data.table(tibble::tribble(
   "vioeul_cat_detailed","violation_eu_law",
   "vionatl_cat_detailed","violation_national_law",
   "NA_cat_detailed","detailed_category_NA",
+  "o_cat_detailed","detailed_category_other",
   
   # decision ground
   "illc_des_ground","illegal_content",

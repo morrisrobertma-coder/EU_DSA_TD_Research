@@ -33,7 +33,8 @@ for(out_files in c(zip_in, zip_mid_out, zip_out,
                    out_youtube, out_whatsapp, out_instagram,
                    out_tiktok, out_snap, out_x,
                    out_dq_path, out_qual_path,
-                   out_clean_path)){
+                   out_clean_path, out_rq1,
+                   out_rq2, out_rq3)){
   
   if(!dir.exists(out_files)){
   dir.create(paste0(out_files))
@@ -60,7 +61,7 @@ global_files <- list.files(paste0(inp,global))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # One File Approach
 ## Define File & Date if Manual Run Needed
-global_file_man <- "sor-instagram-2025-01-02-full.zip"
+global_file_man <- "sor-x-2025-01-02-full.zip"
 
 # One Platform Approach
 plat_man <- 'x'
@@ -71,14 +72,15 @@ global_file_plat_man <- global_files[grepl(paste0(plat_man), global_files)]
 ## Aut Man = 'Y' = Run One Selected File
 ## Aut Plat = 'Y' = Run One Selected Platform
 aut <- "N"
-aut_man <- "N"
-aut_plat <- "Y"
+aut_man <- "Y"
+aut_plat <- "N"
 
+# Assign Files to Run
 if (aut == "N"){
   if (aut_man == "Y"){
     global_files <- global_file_man
   } else if (aut_plat == "Y"){
-  global_files <- global_file_plat_man
+    global_files <- global_file_plat_man
   } else {
     print("Invalid Automation Selection")
   }
