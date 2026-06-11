@@ -34,6 +34,12 @@ for(out_files in c(zip_in, zip_mid_out, zip_out,
 # Extract File names
 global_files <- list.files(paste0(inp,global))
 global_file_plat_man <- global_files[grepl(paste0(plat_man), global_files)]
+global_file_plat_man_month <- global_files[grepl(paste0("^sor-", 
+                                                        plat_man_month,
+                                                        "-\\d{4}-",
+                                                        plat_man_month_date,
+                                                        "-\\d{2}-full\\.zip$"), 
+                                                 global_files)]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Automatic or Manual Run ----
@@ -44,6 +50,8 @@ if (aut == "N"){
     global_files <- global_file_man
   } else if (aut_plat == "Y"){
     global_files <- global_file_plat_man
+  } else if (aut_plat_month == "Y"){
+    global_files <- global_file_plat_man_month
   } else {
     print("Invalid Automation Selection")
   }
@@ -102,17 +110,21 @@ if (collection_only == "N"){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     source(paste0(inp_code,"02_quant/02_rq3.R"))
 
+  } 
+  
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Aggregate All Available Outputs ----
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if(collect == "Y"){
-    source(paste0(inp,"03_collect/00_collect.R"))
-    }
+if(collect == "Y"){
+  source(paste0(inp_code,"03_collect/00_collect.R"))
+  }
+}
 
-  } else if (collection_only == "Y"){
+if (collection_only == "Y"){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Collection
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    source(paste0(inp,"03_collect/00_collect.R"))
-  }
+    source(paste0(inp_code,"03_collect/00_collect.R"))
 }
+  
+

@@ -11,41 +11,47 @@ rm(list = ls())
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Input/Output Paths ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-### Code Input
+# Code Input
 inp_code <- c("~/06_university/00_university_of_sussex/05_summer_semester/05_dissertation/01_code/")
 
-### Data Input
+# Data Input
 inp <- c("C:/00_temp_data_processing/")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-# File Remove ----
+# File Remove? ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-### Set Parameter = TRUE if global zipped files should be deleted after processing
+# Set Parameter = TRUE if global zipped files should be deleted after processing
 remove_global_files <- FALSE
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Automatic or Manual Run ----
+# Automatic or Manual Run? ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-# One File Approach - Define File/Date Combination
-global_file_man <- "sor-x-2025-01-02-full.zip"
-
 # One Platform Approach - Define Platform 
 plat_man <- 'x'
 
+# One Platform/One Month Approach
+plat_man_month <- 'x'
+plat_man_month_date <- '02'
+
+# One File Approach - Define File/Date Combination
+global_file_man <- "sor-x-2025-01-02-full.zip"
+
 # Define Automation - Aut = 'Y' = Run All Global Files
-#                     Aut Man = 'Y' = Run One Selected File
 #                     Aut Plat = 'Y' = Run One Selected Platform
+#                     Aut Plat Month = 'Y' = Run Platform/Month Combination
+#                     Aut Man = 'Y' = Run One Selected File
 aut <- "N"
-aut_man <- "N"
 aut_plat <- "N"
+aut_plat_month <- "Y"
+aut_man <- "N"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Collect Results? ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # After run should ALL available results be amalgamated? 
-collect <- "Y"
+collect <- "N"
 
-# Run ONLY COLLECTION - No calculation pipeline
+# Run ONLY COLLECTION? - No calculation pipeline.
 collection_only <- "N"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

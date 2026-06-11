@@ -87,7 +87,8 @@ for (s in 1:nrow(steps)){
           
           # Bind to Output
           out_dq_clean <- rbind(out_dq_clean,
-                                dt_dq_clean)
+                                dt_dq_clean,
+                                fill = TRUE)
           }
       
       } else {
