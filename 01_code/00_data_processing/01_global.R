@@ -7,17 +7,6 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 print(paste0(" DATA PROCESSING: ", extr_plat," ", extr_date, " - START AT ", Sys.time()))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Initialization ----
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Create Folders
-for(out_files in c(zip_mid_out, zip_out,
-                   map_platform[platform == extr_plat, output])){
-  
-  dir.create(paste0(out_files,"/",extr_date))
-  
-}
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Data Processing ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Unzip Global File ----

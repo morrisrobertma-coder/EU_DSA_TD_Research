@@ -8,9 +8,7 @@ print(paste0("SOR UPSTREAM CLEANING: ", extr_plat, " - ", extr_date))
 # Identify Relevant Files ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Individual SOR Platform Files
-for(path in map_platform[, output]){
-  unlink(paste0(path, extr_date), recursive = TRUE)
-}
+unlink(paste0(map_platform[platform == extr_plat], extr_date), recursive = TRUE)
 
 # Global UnUnzipped Folders
 unlink(paste0(zip_out, extr_date, "-", extr_plat), recursive = TRUE)
@@ -27,4 +25,3 @@ if (remove_global_files == TRUE){
 # Clean-Up ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 print(paste0("SOR UPSTREAM CLEANING: ", extr_plat, " - ", extr_date, " - COMPLETE "))
-gc()

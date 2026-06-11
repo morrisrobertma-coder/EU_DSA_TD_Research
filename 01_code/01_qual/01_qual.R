@@ -32,6 +32,7 @@ if(length(rel_files) > 0){
     
     # cut down to columns of interest
     cols_of_interest <- c('incompatible_content_ground','incompatible_content_explanation',
+                          'incompatible_content_illegal',
                           'decision_facts','category_specification_other',
                           'illegal_content_legal_ground',
                           'illegal_content_explanation')
@@ -54,6 +55,11 @@ if(length(rel_files) > 0){
     qual_2 <- dt[,.(freq = .N), by = "incompatible_content_explanation"][
       , q := "incompatible_content_explanation"]
     colnames(qual_2) <- c('statement','freq','q')
+    
+    # incompatible content illegal
+    qual_2_1 <- dt[,.(freq = .N), by = "incompatible_content_illegal"][
+      , q := "incompatible_content_illegal"]
+    colnames(qual_2_1) <- c('statement','freq','q')
   
     # decision facts
     qual_3 <- dt[,.(freq = .N), by = "decision_facts"][
@@ -76,7 +82,7 @@ if(length(rel_files) > 0){
     colnames(qual_6) <- c('statement','freq','q')
   
     # bind all outputs
-    out <- rbind(qual_1, qual_2, qual_3, qual_4, qual_5, qual_6)
+    out <- rbind(qual_1, qual_2, qual_2_1, qual_3, qual_4, qual_5, qual_6)
   
     # change colnames
     setnames(out, 'freq', paste0(ind_file)) 
@@ -96,6 +102,7 @@ if(length(rel_files) > 0){
     }
 }
 
+  if(nrow(out_qual) > 1){
   # remove empty question
   out_qual <- out_qual[!(q == '')]
 
@@ -121,9 +128,12 @@ if(length(rel_files) > 0){
   # bind all platform data
   out_all <- rbind(out_all,
                    out_qual)
+  
+  }
 
 }
 
+if(nrow(out_all) > 0){
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Export Qualitative Analysis File
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -150,3 +160,4 @@ rm(out_all)
 rm(out_qual)
 rm(qual_1, qual_2, qual_3, qual_4, qual_5, qual_6)
 gc()
+}

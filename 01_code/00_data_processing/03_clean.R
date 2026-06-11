@@ -345,6 +345,24 @@ for(subfile in rel_files){
   dt <- dt[, incomp_c_illegal:= tolower(incompatible_content_illegal)][
     , incompatible_content_illegal := NULL]
   
+  # find NA frequency
+  if (nrow(dt[!(is.na(incomp_c_illegal))]) != 0){
+    
+    # cut-down qualitative table
+    dt_qual_cut <- dt_qual[q == 'incompatible_content_illegal'][
+      ,.(statement, q_id)]
+    
+    # merge qualitative statement id
+    dt <- merge(dt, dt_qual_cut, by.x = 'incomp_c_illegal',
+                by.y = 'statement',
+                all.x = T)
+    
+    dt <- dt[, incomp_c_illegal := q_id][, q_id := NULL]
+    
+  } 
+  
+  dt <- dt [, incompatible_content_illegal := NULL]
+  
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Decision Visibility ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 

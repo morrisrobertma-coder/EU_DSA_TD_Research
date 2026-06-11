@@ -129,56 +129,68 @@ for(ind_file in rel_files){
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Organize Output
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-out_col_order <- c('date','platform','file','number_of_rows',
-                   'number_unique_platform_names','unique_platform_values',
-                   'num_eu','num_eu_and_eea_entries','not_eu_or_eu_and_eea',
-                   'minimum_sor_date',
-                   'maximum_sor_date','number_sor_date_na',
-                   'minimum_content_date','maximum_content_date',
-                   'number_content_date_na',
-                   'minimum_application_date','maximum_application_date',
-                   'number_application_date_na',
-                   'number_unique_uuids','number_unique_platform_uuids')
-
-setcolorder(out_dq, out_col_order)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Flags
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# territory
-out_dq <- out_dq[, check_terr := ifelse(num_eu + num_eu_and_eea_entries + not_eu_or_eu_and_eea 
-                                        == number_of_rows, "N","Y")]
-
-# unique uuids
-out_dq <- out_dq[, check_uuids := ifelse(number_unique_uuids != number_of_rows, "Y","N")]
-
-# unique platform uuids
-out_dq <- out_dq[, check_plat_uuids := ifelse(number_unique_platform_uuids != number_of_rows, "Y","N")]
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Export Data Quality File
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("DATA QUALITY: ", extr_plat, " ", extr_date, " - EXPORT AT ", Sys.time()))
-
-# Check for folder
-file_path <- paste0(out_dq_path, extr_date)
-
-if(!dir.exists(file_path)) {
-  dir.create(paste0(out_dq_path, extr_date))
+# IMPORTANT SET NO CONTINUATION FLAG
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+# For some time-slices and platforms no SORs were entered.
+# This flag blocks the continuation of the pipeline for these days.
+if(nrow(out_dq) == 0){
+  stop_pipeline_dead <- "TRUE"
+} else {
+  stop_pipeline_dead <- "FALSE"
 }
 
-# Export
-fwrite(out_dq, file = paste0(out_dq_path, extr_date, "/", extr_plat,".csv"),
-          row.names = FALSE)
+if(nrow(out_dq) > 0){
 
-print(paste0("DATA QUALITY: ", extr_plat, " ", extr_date, " - EXPORT COMPLETE AT ", Sys.time()))
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Organize Output
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  out_col_order <- c('date','platform','file','number_of_rows',
+                     'number_unique_platform_names','unique_platform_values',
+                     'num_eu','num_eu_and_eea_entries','not_eu_or_eu_and_eea',
+                     'minimum_sor_date',
+                     'maximum_sor_date','number_sor_date_na',
+                     'minimum_content_date','maximum_content_date',
+                     'number_content_date_na',
+                     'minimum_application_date','maximum_application_date',
+                     'number_application_date_na',
+                     'number_unique_uuids','number_unique_platform_uuids')
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Clean
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-rm(out_dq)
-gc()
+  setcolorder(out_dq, out_col_order)
 
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Flags
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # territory
+  out_dq <- out_dq[, check_terr := ifelse(num_eu + num_eu_and_eea_entries + not_eu_or_eu_and_eea 
+                                          == number_of_rows, "N","Y")]
+
+  # unique uuids
+  out_dq <- out_dq[, check_uuids := ifelse(number_unique_uuids != number_of_rows, "Y","N")]
+
+  # unique platform uuids
+  out_dq <- out_dq[, check_plat_uuids := ifelse(number_unique_platform_uuids != number_of_rows, "Y","N")]
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Export Data Quality File
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  print(paste0("DATA QUALITY: ", extr_plat, " ", extr_date, " - EXPORT AT ", Sys.time()))
+
+  # Check for folder
+  file_path <- paste0(out_dq_path, extr_date)
+
+  if(!dir.exists(file_path)) {
+    dir.create(paste0(out_dq_path, extr_date))
+  }
+
+  # Export
+  fwrite(out_dq, file = paste0(out_dq_path, extr_date, "/", extr_plat,".csv"),
+            row.names = FALSE)
+
+  print(paste0("DATA QUALITY: ", extr_plat, " ", extr_date, " - EXPORT COMPLETE AT ", Sys.time()))
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Clean
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  rm(out_dq)
+}
 }

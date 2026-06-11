@@ -2,12 +2,6 @@
 # 01_run_pipeline
 # Purpose of Script: Run Whole R Pipeline with parameters from 00_run.R.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Packages
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-library(data.table)
-library(arrow)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Support Script
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 source(paste0(inp_code, "xx_config.R"))
@@ -77,7 +71,8 @@ if (collection_only == "N"){
     # Run Platform Level Data Quality
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     source(paste0(inp_code,"00_data_processing/02_dq.R"))
-  
+    
+    if(stop_pipeline_dead == "FALSE"){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Qualitative Analysis
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -109,7 +104,7 @@ if (collection_only == "N"){
     # RQ3 - Categorization & Legal Status 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     source(paste0(inp_code,"02_quant/02_rq3.R"))
-
+    }
   } 
   
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -126,5 +121,19 @@ if (collection_only == "Y"){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     source(paste0(inp_code,"03_collect/00_collect.R"))
 }
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Dead Pipelines
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+if(stop_pipeline_dead == "TRUE"){
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Print Warning
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  print(paste0("NO SOR ENTRIES - PIPELINE DEAD: ", extr_plat," - ", extr_date))
   
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Still Upstream Clean
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  source(paste0(inp_code,"00_data_processing/04_upstream_clean.R"))
+}
 

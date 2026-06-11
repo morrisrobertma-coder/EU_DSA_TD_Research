@@ -85,7 +85,11 @@ for(subfile in rel_files){
     ### Extract IDs and assign to Qual
     ill_ids <- dt_quant[illegal_flag == 1,sor_id]
     
+    if (length(ill_ids) > 0){
     dt_qual <- dt_qual[sor_id %in% ill_ids, illegal_flag := 1]
+    } else {
+      dt_qual <- dt_qual[, illegal_flag := 0]
+    }
     
     ### Format
     setcolorder(dt_quant, c("sor_id","syn_flag","illegal_flag"))

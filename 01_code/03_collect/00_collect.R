@@ -103,11 +103,13 @@ for (s in 1:nrow(steps)){
   
   export_dt <- copy(out_dt)[, runtime := paste0(Sys.time())]
   setcolorder(export_dt, c("runtime", "platform", "date"))
+  export_dt[is.na(export_dt)] <- 0
   write_parquet(export_dt, paste0(file_path,"/", step, ".parquet"))
   
   if(nrow(out_dq_clean) > 0){
   export_dq_clean <- copy(out_dq_clean)[, runtime := paste0(Sys.time())]
   setcolorder(export_dq_clean, c("runtime", "platform", "date"))
+  export_dq_clean[is.na(export_dq_clean)] <- 0
   write_parquet(export_dq_clean, paste0(file_path,"/", "dq_clean.parquet"))
   }
   print(paste0("RESULT COLLECTION - STEP : ", step, " - EXPORT COMPLETE ", Sys.time()))
