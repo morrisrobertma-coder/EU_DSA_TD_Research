@@ -40,7 +40,7 @@ out_rq2 <- paste0(inp, "08_rq2/")
 out_rq3 <- paste0(inp, "09_rq3/")
 
 # Collection
-out_collection <- paste0(inp, "08_collected/")
+out_collection <- paste0(inp, "10_collected/")
 
 ### Platforms ----
 # Company/Platform Name Mapping

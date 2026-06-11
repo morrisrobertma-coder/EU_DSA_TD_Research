@@ -235,7 +235,8 @@ for(subfile in rel_files){
 # fill NAs
 out_dt[is.na(out_dt)] <- 0
 
-out_data_agg <- out_dt[, lapply(.SD, sum), by = c('syn_flag','illegal_flag'), .SDcols = !c('syn_flag','illegal_flag')]
+out_data_agg <- out_dt[, lapply(.SD, sum), by = c('syn_flag','illegal_flag'),
+                       .SDcols = !c('syn_flag','illegal_flag')]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Daily Aggregation - Qual ----
@@ -265,6 +266,16 @@ output_col_order <- c('date','platform','syn_flag','illegal_flag')
 setcolorder(out_data_agg, neworder = output_col_order)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Format Output - Qual ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+out_data_qual_agg <- out_data_qual_agg[,':='(platform = paste0(extr_plat),
+                                             date = paste0(extr_date))]
+
+output_col_order <- c(output_col_order, "qual_cat")
+
+setcolorder(out_data_qual_agg, output_col_order)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Upload Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 print(paste0("RQ3: ", extr_plat, " - ", extr_date, " - EXPORT AT: ", Sys.time()))
@@ -276,15 +287,27 @@ if(!dir.exists(file_path)) {
   dir.create(paste0(out_rq3, extr_date))
 }
 
-# Export as Parquet File
-write_parquet(out_data_agg, paste0(out_rq3, extr_date, "/", extr_plat,"_rq3.parquet"))
+# Export as Parquet File - Quant & Qual
+write_parquet(out_data_agg, paste0(out_rq3, extr_date, "/", extr_plat,"_rq3_quant.parquet"))
+write_parquet(out_data_qual_agg, paste0(out_rq3, extr_date, "/", extr_plat,"_rq3_qual.parquet"))
 
 print(paste0("RQ3: ", extr_plat, " - ", extr_date, " - EXPORT COMPLETE AT: ", Sys.time()))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean-Up ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+rm(dt_qual)
+rm(dt_qual_imp)
+rm(dt_quant)
 rm(out_dt)
-rm(out_data)
 rm(out_data_agg)
+rm(out_data_qual)
+rm(out_data_qual_agg)
+rm(out_dt_quant)
+rm(t)
+rm(tables)
+rm(tables_qual)
+rm(list = c("agg_0","agg_1","agg_2","agg_3",
+            "agg_4","agg_5","agg_6","agg_7",
+            "agg_8","agg_9"))
 gc()

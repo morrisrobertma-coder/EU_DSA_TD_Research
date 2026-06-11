@@ -1,24 +1,11 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 00_run_pipeline
-# Purpose of Script: Run Whole R Pipeline for Data Processing.
+# 01_run_pipeline
+# Purpose of Script: Run Whole R Pipeline with parameters from 00_run.R.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Initialization ----
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#rm(list = ls())
-
 # Packages
-#library(data.table)
-#library(arrow)
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Input/Output Paths
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-### Data Input
-inp <- c("C:/00_temp_data_processing/")
-#inp <- c("~/06_university/00_university_of_sussex/05_summer_semester/05_dissertation/00_data/")
-
-### Code Input
-inp_code <- c("~/06_university/00_university_of_sussex/05_summer_semester/05_dissertation/01_code/")
+library(data.table)
+library(arrow)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Support Script
@@ -42,39 +29,15 @@ for(out_files in c(zip_in, zip_mid_out, zip_out,
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Run Parameters ----
+# All Available Global Files ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# File Remove
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Set Parameter = TRUE if global zipped files should be
-# deleted after processing
-remove_global_files <- FALSE
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
-# All Available Global Files
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Extract File names
 global_files <- list.files(paste0(inp,global))
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Automatic or Manual Run ----
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
-# One File Approach
-## Define File & Date if Manual Run Needed
-global_file_man <- "sor-x-2025-01-02-full.zip"
-
-# One Platform Approach
-plat_man <- 'x'
 global_file_plat_man <- global_files[grepl(paste0(plat_man), global_files)]
 
-# Define Automation
-## Aut = 'Y' = Run All Global Files
-## Aut Man = 'Y' = Run One Selected File
-## Aut Plat = 'Y' = Run One Selected Platform
-aut <- "N"
-aut_man <- "Y"
-aut_plat <- "N"
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Automatic or Manual Run ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Assign Files to Run
 if (aut == "N"){
   if (aut_man == "Y"){
@@ -85,16 +48,6 @@ if (aut == "N"){
     print("Invalid Automation Selection")
   }
 }
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Collect Results? ----
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
-# After run should all available results be amalgamated? 
-### Collects data for ALL platforms
-collect <- "Y"
-
-# Run ONLY COLLECTION - No calculation pipeline
-collection_only <- "N"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run Data Pipeline ----
@@ -163,9 +116,3 @@ if (collection_only == "N"){
     source(paste0(inp,"03_collect/00_collect.R"))
   }
 }
-    
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Clean-Up ----
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-gc()
-rm(list = ls())
