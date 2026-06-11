@@ -60,7 +60,12 @@ if (collection_only == "N"){
     # Extract Platform and Date
     split <- strsplit(i, "-")[[1]]
     extr_plat <- paste0(split[2])
+    
+    if(extr_plat == "whatsapp"){
+    extr_date <- paste(split[4:6], collapse = "-")
+    } else {
     extr_date <- paste(split[3:5], collapse = "-")
+    }
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Global Data Processing
@@ -137,3 +142,4 @@ if(stop_pipeline_dead == "TRUE"){
   source(paste0(inp_code,"00_data_processing/04_upstream_clean.R"))
 }
 
+print(paste0("PIPELINE COMPLETE - ", extr_plat, " - ", extr_date))

@@ -342,8 +342,7 @@ for(subfile in rel_files){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Incompatible Content Illegal ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, incomp_c_illegal:= tolower(incompatible_content_illegal)][
-    , incompatible_content_illegal := NULL]
+  dt <- dt[, incomp_c_illegal:= tolower(incompatible_content_illegal)]
   
   # find NA frequency
   if (nrow(dt[!(is.na(incomp_c_illegal))]) != 0){
