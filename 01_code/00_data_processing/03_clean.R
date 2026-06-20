@@ -59,7 +59,7 @@ for(subfile in rel_files){
   print(paste0("SOR CLEANING: ", extr_plat, " ", extr_date, ". File = ", subfile, " - START AT: ", Sys.time()))
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ## Import Data --subfu--
+  ## Import Data ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   dt <- fread(file = paste0(paste0(map_platform[platform == extr_plat, output], extr_date, "/", subfile)),
               drop = drop_cols)
@@ -79,12 +79,10 @@ for(subfile in rel_files){
   ## Territorial Scope ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   # clean
-  dt$terr <- sapply(dt$territorial_scope, function(x) {
-    x <- sub("^\\[", "", x)
-    x <- sub("\\]$", "", x)
-    gsub('"', "", x)
-  })
-  
+  dt[, terr := territorial_scope]
+  dt[, terr := sub("^\\[", "", terr)]
+  dt[, terr := sub("\\]$", "", terr)]
+  dt[, terr := gsub('"', "", terr, fixed = TRUE)]
   dt[, terr_eu_inc_eea := as.integer(terr == eu_inc_eea)]
   dt[, terr_eu_ex_eea := as.integer(terr == eu_ex_eea)]
   
@@ -92,15 +90,16 @@ for(subfile in rel_files){
   all_countries <- unique(unlist(strsplit(dt$terr, ",")))
   all_countries <- setdiff(all_countries, c("", NA))
   
+  # find valid rows for country expansion
+  valid_rows <- dt$terr != eu_inc_eea & dt$terr != eu_ex_eea
+  
   for (ctry in all_countries) {
-    
     col_name <- paste0("terr_", tolower(ctry))
+    dt[, (col_name) := 0L]
     
-    dt[, (col_name) :=
-              as.integer(
-              terr != eu_inc_eea &
-              terr != eu_ex_eea &
-              grepl(paste0("(^|,)", ctry, "(,|$)"), terr))]
+    dt[valid_rows, (col_name) := as.integer(grepl(paste0("(^|,)",
+                                                         ctry,
+                                                         "(,|$)"),terr))]
   }
   
   dt <- dt[, territorial_scope := NULL]
@@ -123,7 +122,7 @@ for(subfile in rel_files){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   dt <- dt[, app_d := format(as.Date(application_date), "%Y-%m-%d")][
     , application_date := NULL]
-  
+
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Automated Detection ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -140,11 +139,10 @@ for(subfile in rel_files){
   ## Content Type ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ### Clean
-  dt$cont_type <- sapply(dt$content_type, function(x) {
-    x <- sub("^\\[", "", x)
-    x <- sub("\\]$", "", x)
-    gsub('"', "", x)
-  })
+  dt[, cont_type := content_type]
+  dt[, cont_type := sub("^\\[", "", cont_type)]
+  dt[, cont_type := sub("\\]$", "", cont_type)]
+  dt[, cont_type := gsub('"', "", cont_type, fixed = TRUE)]
   
   dt <- dt[map_cont, cont_type := i.abkurzung, on = .(cont_type = des)][
     , content_type := NULL]
@@ -157,11 +155,10 @@ for(subfile in rel_files){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Content Language ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt$cont_lang <- sapply(dt$content_language, function(x) {
-    x <- sub("^\\[", "", x)
-    x <- sub("\\]$", "", x)
-    gsub('"', "", x)
-  })
+  dt[, cont_lang := content_language]
+  dt[, cont_lang := sub("^\\[", "", cont_lang)]
+  dt[, cont_lang := sub("\\]$", "", cont_lang)]
+  dt[, cont_lang := gsub('"', "", cont_lang, fixed = TRUE)]
   
   dt <- dt[, cont_lang := tolower(cont_lang)][
     , content_language := NULL]
@@ -183,12 +180,10 @@ for(subfile in rel_files){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Category Specification ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt$category_specification <- sapply(dt$category_specification,
-                                      function(x) {
-    x <- sub("^\\[", "", x)
-    x <- sub("\\]$", "", x)
-    gsub('"', "", x)
-  })
+  dt[, category_specification := category_specification]
+  dt[, category_specification := sub("^\\[", "", category_specification)]
+  dt[, category_specification := sub("\\]$", "", category_specification)]
+  dt[, category_specification := gsub('"', "", category_specification, fixed = TRUE)]
   
   dt <- dt[map_cat_spec, cat_spec := i.abkurzung, on = .(category_specification = des)][
     , category_specification := NULL]
@@ -269,7 +264,7 @@ for(subfile in rel_files){
   } 
   
   dt <- dt [, illegal_content_legal_ground := NULL]
-  
+
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Illegal Content Explanation ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -366,11 +361,10 @@ for(subfile in rel_files){
   ## Decision Visibility ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ### Clean
-  dt$des_vis <- sapply(dt$decision_visibility, function(x) {
-    x <- sub("^\\[", "", x)
-    x <- sub("\\]$", "", x)
-    gsub('"', "", x)
-  })
+  dt[, des_vis := decision_visibility]
+  dt[, des_vis := sub("^\\[", "", des_vis)]
+  dt[, des_vis := sub("\\]$", "", des_vis)]
+  dt[, des_vis := gsub('"', "", des_vis, fixed = TRUE)]
   
   # empty cell format
   dt <- dt[, des_vis := ifelse(des_vis == '', NA, des_vis)]
@@ -394,11 +388,10 @@ for(subfile in rel_files){
   ## Decision Monetary ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ### Clean
-  dt$des_mon <- sapply(dt$decision_monetary, function(x) {
-    x <- sub("^\\[", "", x)
-    x <- sub("\\]$", "", x)
-    gsub('"', "", x)
-  })
+  dt[, des_mon := decision_monetary]
+  dt[, des_mon := sub("^\\[", "", des_mon)]
+  dt[, des_mon := sub("\\]$", "", des_mon)]
+  dt[, des_mon := gsub('"', "", des_mon, fixed = TRUE)]
   
   # empty cell format
   dt <- dt[, des_mon := ifelse(des_mon == '', NA, des_mon)]
@@ -422,11 +415,10 @@ for(subfile in rel_files){
   ## Decision Provision ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ### Clean
-  dt$des_prov <- sapply(dt$decision_provision, function(x) {
-    x <- sub("^\\[", "", x)
-    x <- sub("\\]$", "", x)
-    gsub('"', "", x)
-  })
+  dt[, des_prov := decision_provision]
+  dt[, des_prov := sub("^\\[", "", des_prov)]
+  dt[, des_prov := sub("\\]$", "", des_prov)]
+  dt[, des_prov := gsub('"', "", des_prov, fixed = TRUE)]
   
   # empty cell format
   dt <- dt[, des_prov := ifelse(des_prov == '', NA, des_prov)]
