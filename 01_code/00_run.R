@@ -31,7 +31,7 @@ remove_global_files <- FALSE
 # Automatic or Manual Run? ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # One Platform Approach - Define Platform 
-plat_man <- 'facebook'
+plat_man <- 'snapchat'
 
 # One Platform/One Month Approach
 plat_man_month <- 'snapchat'
@@ -39,16 +39,16 @@ plat_man_month_date <- '01'
 plat_man_month_year <- '2025'
 
 # One File Approach - Define File/Date Combination
-global_file_man <- "sor-instagram-2025-02-26-full.zip"
+global_file_man <- "sor-snapchat-2025-01-20-full.zip"
 
 # Define Automation - Aut = 'Y' = Run All Global Files
 #                     Aut Plat = 'Y' = Run One Selected Platform
 #                     Aut Plat Month = 'Y' = Run Platform/Month Combination
 #                     Aut Man = 'Y' = Run One Selected File
 aut <- "N"
-aut_plat <- "N"
+aut_plat <- "Y"
 aut_plat_month <- "N"
-aut_man <- "Y"
+aut_man <- "N"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Collect Results? ----
