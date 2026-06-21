@@ -71,17 +71,28 @@ if (collection_only == "N"){
     # Run Global Data Processing
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     source(paste0(inp_code,"00_data_processing/01_global.R"))
-  
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Sample Staging
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if(extr_plat == "facebook" | extr_plat == "tiktok" | extr_plat == "instagram" | extr_plat == "snapchat"){
+    source(paste0(inp_code,"00_data_processing/01a_stage.R"))
+    }
+      
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Platform Level Data Quality
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    source(paste0(inp_code,"00_data_processing/02_dq.R"))
+    if(extr_plat == "facebook" | extr_plat == "snapchat" | extr_plat == "instagram" | extr_plat == "tiktok"){
+      source(paste0(inp_code,"00_data_processing/02_dq_test.R"))
+    } else {
+      source(paste0(inp_code,"00_data_processing/02_dq.R"))
+    }
     
     if(stop_pipeline_dead == "FALSE"){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Qualitative Analysis
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if(extr_plat == "snapchat"){
+    if(extr_plat == "facebook" | extr_plat == "snapchat" | extr_plat == "instagram" | extr_plat == "tiktok"){
     source(paste0(inp_code,"01_qual/01_qual_test.R"))
     } else {
       source(paste0(inp_code,"01_qual/01_qual.R"))
@@ -90,7 +101,7 @@ if (collection_only == "N"){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Data Cleaning
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if(extr_plat == "facebook" | extr_plat == "snapchat"){
+    if(extr_plat == "facebook" | extr_plat == "snapchat" | extr_plat == "instagram" | extr_plat == "tiktok"){
       source(paste0(inp_code,"00_data_processing/03_clean_test.R"))
     } else {
     source(paste0(inp_code,"00_data_processing/03_clean.R"))

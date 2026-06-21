@@ -39,7 +39,7 @@ plat_man_month_date <- '01'
 plat_man_month_year <- '2025'
 
 # One File Approach - Define File/Date Combination
-global_file_man <- "sor-snapchat-2025-01-20-full.zip"
+global_file_man <- "sor-facebook-2025-02-03-full.zip"
 
 # Define Automation - Aut = 'Y' = Run All Global Files
 #                     Aut Plat = 'Y' = Run One Selected Platform

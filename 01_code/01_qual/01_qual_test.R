@@ -11,7 +11,7 @@ out_all <- data.table()
 print(paste0("QUALITATIVE ANALYSIS: ", extr_plat, " - ", extr_date, " - START AT ", Sys.time()))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Identify Relevant Files
+# Identify Relevant Files ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 rel_files <- list.files(paste0(map_platform[platform == extr_plat, output], extr_date))
 
@@ -27,10 +27,11 @@ cols_of_interest <- c('incompatible_content_ground','incompatible_content_explan
                       'illegal_content_explanation')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Perform Qualitative Analysis
+# Define Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if(length(rel_files) > 0){
   
+  if(extr_plat != "facebook" | extr_plat != "tiktok" | extr_plat != "instagram"| extr_plat != "snapchat"){
   dt <- data.table()
   
   # Define Files & Paths
@@ -40,6 +41,13 @@ if(length(rel_files) > 0){
   # Import Data
   dt <- rbindlist(lapply(pop_files_full, function(f) fread(f, select = cols_of_interest)))
   
+  } else if(extr_plat == "facebook" | extr_plat == "tiktok" | extr_plat == "instagram" | extr_plat == "snapchat"){
+    dt <- copy(dt_samp)
+  }
+  
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Perform Qualitative Analysis ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if(nrow(dt) > 0){
 
   # lower all columns (some duplicates occur as random letters capitalized)

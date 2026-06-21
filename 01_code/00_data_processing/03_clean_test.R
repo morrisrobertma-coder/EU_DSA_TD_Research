@@ -49,10 +49,9 @@ drop_cols <- c("uuid", "account_type", "decision_ground_reference_url",
 out_dq_clean <- data.table()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Clean Data ----
+# Define Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Generate One Data Table ----
-#~~~~~~~~~~~~~~~~~~~~~~~~~~
+if(extr_plat != "facebook" | extr_plat != "tiktok" | extr_plat != "instagram" | extr_plat != "snapchat"){
 dt <- data.table()
 
 # Define Files & Paths
@@ -61,8 +60,12 @@ pop_files_full <- file.path(paste0(map_platform[platform == extr_plat, output], 
 
 dt <- rbindlist(lapply(pop_files_full, function(f) fread(f, drop = drop_cols)))
 
+} else if(extr_plat == "facebook" | extr_plat == "tiktok" | extr_plat == "instagram" | extr_plat == "snapchat"){
+  dt <- copy(dt_samp)
+}
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-## Clean ----
+## Clean Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 if(nrow(dt) > 0){
   
