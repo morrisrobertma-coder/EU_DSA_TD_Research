@@ -230,7 +230,7 @@ setcolorder(out_data_agg, neworder = output_col_order)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Upload Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("RQ1: ", extr_plat, " - ", extr_date, " - EXPORT AT: ", Sys.time()))
+print(paste0("RQ1: ", extr_plat, " - ", " DATE: ", extr_date, " - EXPORT AT: ", Sys.time()))
 
 # Check for folder
 file_path <- paste0(out_rq1, extr_date)
@@ -242,7 +242,7 @@ if(!dir.exists(file_path)) {
 # Export as Parquet File
 write_parquet(out_data_agg, paste0(out_rq1, extr_date, "/", extr_plat,"_rq1.parquet"))
 
-print(paste0("RQ1: ", extr_plat, " - ", extr_date, " - EXPORT COMPLETE AT: ", Sys.time()))
+print(paste0("RQ1: ", extr_plat, " - ", " DATE: ", extr_date, " - EXPORT COMPLETE AT: ", Sys.time()))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean-Up ----

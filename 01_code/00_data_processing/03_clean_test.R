@@ -501,5 +501,9 @@ print(paste0("CLEANING DATA QUALITY: ", extr_plat, " ", extr_date, " - EXPORT CO
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean Up ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Remove local files
 rm(dt_qual, dt_qual_cut, out_dq_clean)
+
+# Remove Staged Sample
+rm(dt_samp)
 gc()

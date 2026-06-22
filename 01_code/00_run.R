@@ -31,7 +31,7 @@ remove_global_files <- FALSE
 # Automatic or Manual Run? ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # One Platform Approach - Define Platform 
-plat_man <- 'snapchat'
+plat_man <- 'facebook'
 
 # One Platform/One Month Approach
 plat_man_month <- 'snapchat'

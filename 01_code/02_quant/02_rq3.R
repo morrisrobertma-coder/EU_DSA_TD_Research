@@ -282,7 +282,7 @@ setcolorder(out_data_qual_agg, output_col_order)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Upload Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-print(paste0("RQ3: ", extr_plat, " - ", extr_date, " - EXPORT AT: ", Sys.time()))
+print(paste0("RQ3: ", extr_plat, " - ", " DATE: ", extr_date, " - EXPORT AT: ", Sys.time()))
 
 # Check for folder
 file_path <- paste0(out_rq3, extr_date)
@@ -295,7 +295,7 @@ if(!dir.exists(file_path)) {
 write_parquet(out_data_agg, paste0(out_rq3, extr_date, "/", extr_plat,"_rq3_quant.parquet"))
 write_parquet(out_data_qual_agg, paste0(out_rq3, extr_date, "/", extr_plat,"_rq3_qual.parquet"))
 
-print(paste0("RQ3: ", extr_plat, " - ", extr_date, " - EXPORT COMPLETE AT: ", Sys.time()))
+print(paste0("RQ3: ", extr_plat, " - ", " DATE: ", extr_date, " - EXPORT COMPLETE AT: ", Sys.time()))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean-Up ----
