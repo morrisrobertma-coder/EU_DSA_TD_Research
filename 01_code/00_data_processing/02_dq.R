@@ -19,101 +19,113 @@ out_dq <- data.table()
 
 # DQ Function
 table_dq <- function(check, t, v){
-  tmp <- as.data.table(tibble::tribble(
-    ~test,
-    v))
+  tmp <- as.data.table(v)
   
-  colnames(tmp) <- paste0(t)
+  colnames(tmp) <- c("file", t)
   
   assign(paste0("dq_", check),tmp,
          envir = .GlobalEnv)
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Define Data
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if(!(extr_plat %in% c(
+  "facebook",
+  "tiktok",
+  "instagram",
+  "snapchat"
+))){
+dt_dq <- data.table()
+
+# Define Files & Paths
+pop_files_full <- file.path(paste0(map_platform[platform == extr_plat, output], extr_date),
+                            rel_files)
+
+# Import Data
+dt_dq <- rbindlist(lapply(pop_files_full, function(f) {
+                   dt <- fread(f)
+                   dt[, file := basename(f)]}))
+
+} else if(extr_plat %in% c(
+  "facebook",
+  "tiktok",
+  "instagram",
+  "snapchat"
+)){
+  dt_dq <- copy(dt_samp)
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Perform Data Quality Checks
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# loop through files
-for(ind_file in rel_files){
-  
-  print(paste0("DATA QUALITY: ", extr_plat, " ", extr_date, " FILE - ", ind_file, " - START AT ", Sys.time()))
-  
-  # import data
-  dt_dq <- fread(paste0(map_platform[platform == extr_plat, output], extr_date, "/", ind_file))
-  
-  if (nrow(dt_dq) > 0){
+if (nrow(dt_dq) > 0){
 
   # column names
   dt_dq_cols <- colnames(dt_dq)
   
   # date
-  table_dq("0_date","date",paste0(extr_date))
+  dq_0_date <- data.table(date = paste0(extr_date))
   
   # platform
-  table_dq("1_plat","platform",paste0(extr_plat))
-  
-  # dq file name
-  table_dq("2_file","file", paste0(ind_file))
-  
+  dq_1_plat <- data.table(platform = paste0(extr_plat))
+
   # number of rows
-  table_dq("3_rows","number_of_rows", nrow(dt_dq))
+  table_dq("3_rows","number_of_rows", dt_dq[,.N, by = file])
   
   # platform name
-  table_dq("4_uni_plt","number_unique_platform_names", length(unique(dt_dq$platform_name)))
-  table_dq("5_uni","unique_platform_values", unique(dt_dq$platform_name))
-  
+  table_dq("4_uni_plt","number_unique_platform_names", dt_dq[,.(n_platforms = uniqueN(platform_name)), by = file])
+  table_dq("5_uni","unique_platform_values", dt_dq[, .(platforms = paste(unique(platform_name), collapse = ", ")), by = file])
+
   # territorial scope
   ### clean
-  dt_dq$territorial_scope <- sapply(dt_dq$territorial_scope, function(x) {
-    x <- sub("^\\[", "", x)
-    x <- sub("\\]$", "", x)
-    gsub('"', "", x)})
+  dt_dq[, terr := territorial_scope]
+  dt_dq[, territorial_scope := sub("^\\[", "", territorial_scope)]
+  dt_dq[, territorial_scope := sub("\\]$", "", territorial_scope)]
+  dt_dq[, territorial_scope := gsub('"', "", territorial_scope, fixed = TRUE)]
    
-  table_dq("6_eu_eea","num_eu_and_eea_entries", nrow(dt_dq[territorial_scope== eu_inc_eea]))
-  table_dq("7_eu","num_eu", nrow(dt_dq[territorial_scope== eu_ex_eea]))
-  table_dq("8_terr_other","not_eu_or_eu_and_eea", nrow(dt_dq[!(territorial_scope %in% c(eu_inc_eea, eu_ex_eea))]))
+  table_dq("6_eu_eea","num_eu_and_eea_entries", dt_dq[,.(num_eu_and_eesa_entries = sum(territorial_scope == eu_inc_eea)), by = file])
+  table_dq("7_eu","num_eu", dt_dq[,.(num_eu = sum(territorial_scope == eu_ex_eea)), by = file])
+  table_dq("8_terr_other","not_eu_or_eu_and_eea", dt_dq[,.(not_eu_or_eu_and_eea = sum(!(territorial_scope %in% c(eu_inc_eea, eu_ex_eea)))), by = file])
   
   # sor date - min, max
-  table_dq("9_min_date","minimum_sor_date", min(dt_dq$created_at)) 
-  table_dq("10_max_date","maximum_sor_date", max(dt_dq$created_at))
-  table_dq("11_na_date","number_sor_date_na", nrow(dt_dq[is.na(created_at)]))
+  table_dq("9_min_date","minimum_sor_date", dt_dq[,.(min_date = min(created_at, na.rm = TRUE)), by = file])
+  table_dq("10_max_date","maximum_sor_date", dt_dq[,.(max_date = max(created_at, na.rm = TRUE)), by = file])
+  table_dq("11_na_date","number_sor_date_na", dt_dq[,.(number_sor_date_na = sum(is.na(created_at))), by = file])
    
   # content date - min, max
-  table_dq("12_min_c_date","minimum_content_date", min(dt_dq$content_date))
-  table_dq("13_max_c_date","maximum_content_date", max(dt_dq$content_date))
-  table_dq("14_na_date","number_content_date_na", nrow(dt_dq[is.na(content_date)]))
+  table_dq("12_min_c_date","minimum_content_date", dt_dq[,.(min_date = min(content_date)), by = file])
+  table_dq("13_max_c_date","maximum_content_date", dt_dq[,.(max_date = max(content_date)), by = file])
+  table_dq("14_na_date","number_content_date_na", dt_dq[,.(number_content_date_na = sum(is.na(content_date))), by = file])
   
   # application date (date restriction applied)
-  table_dq("15_min_app_date","minimum_application_date", min(dt_dq$application_date))
-  table_dq("16_min_app_date","maximum_application_date", max(dt_dq$application_date))
-  table_dq("17_na_date","number_application_date_na", nrow(dt_dq[is.na(application_date)]))
+  table_dq("15_min_app_date","minimum_application_date", dt_dq[,.(min_date = min(application_date)), by = file])
+  table_dq("16_min_app_date","maximum_application_date", dt_dq[,.(max_date = max(application_date)), by = file])
+  table_dq("17_na_date","number_application_date_na", dt_dq[,.(number_application_date_na = sum(is.na(application_date))), by = file])
   
   # uuid
-  table_dq("18_unique_uuid","number_unique_uuids", length(unique(dt_dq$uuid)))
+  table_dq("18_unique_uuid","number_unique_uuids", dt_dq[, .(n_uuid = uniqueN(uuid)), by = file])
   
   # platform uuid
-  table_dq("19_unique_plat_uuid","number_unique_platform_uuids", length(unique(dt_dq$platform_uid)))
+  table_dq("19_unique_plat_uuid","number_unique_platform_uuids", dt_dq[, .(n_platform_uid = uniqueN(platform_uid)), by = file])
   
   # collect all dq tables
   all_vars <- ls(envir= .GlobalEnv)
   dq_vars <- all_vars[grepl("^dq", all_vars)]
-   
+  dq_vars <- setdiff(dq_vars, c("dq_0_date","dq_1_plat"))
+  
   # cbind all dq outputs
   dq_all <- data.table()
-   
-  for (filedq in dq_vars){
-   dq_t <- get(filedq)
-   dq_all <- cbind(dq_all,
-                     dq_t)
-  }
   
-  # remove dq table
-  rm(dq_t)
-  gc()
+  dq_all <- Reduce(function(x,y) merge(x, y, by = "file", all = TRUE),
+                   mget(dq_vars))
+  
+  dq_all <- cbind(dq_all, 
+                  dq_0_date,
+                  dq_1_plat)
   
   # bind to dq output
-  out_dq <- rbind(out_dq,
-                  dq_all,
-                  fill=TRUE)
+  out_dq <- dq_all
   
   # remove all dq tables
   rm(list = dq_vars)
@@ -123,10 +135,9 @@ for(ind_file in rel_files){
   rm(dt_dq)
   rm(dq_vars)
   
-  }
-  print(paste0("DATA QUALITY: ", extr_plat, " ", extr_date, " FILE - ", ind_file, " - END AT ", Sys.time()))
-  
 }
+
+gc()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # IMPORTANT SET NO CONTINUATION FLAG
@@ -188,8 +199,7 @@ if(nrow(out_dq) > 0){
   }
 
   # Export
-  fwrite(out_dq, file = paste0(out_dq_path, extr_date, "/", extr_plat,".csv"),
-            row.names = FALSE)
+  write_parquet(out_dq, paste0(out_dq_path, extr_date, "/", extr_plat,".parquet"))
 
   print(paste0("DATA QUALITY: ", extr_plat, " ", extr_date, " - EXPORT COMPLETE AT ", Sys.time()))
 

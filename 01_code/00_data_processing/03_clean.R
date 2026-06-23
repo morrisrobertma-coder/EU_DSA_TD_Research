@@ -11,7 +11,7 @@ print(paste0("SOR CLEANING: ", extr_plat, " ", extr_date, " - START AT: ", Sys.t
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Identify Relevant Files ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-rel_files <- list.files(paste0(map_platform[platform == extr_plat, output], extr_date))
+rel_files <- pop_files
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Set Up Output File ----
@@ -26,8 +26,8 @@ if(!dir.exists(file_path)) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Import Qualitative Analysis Results ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-dt_qual <- as.data.table(fread(file = paste0(out_qual_path, extr_date, "/",
-                                             extr_plat,"_qual_analysis.csv")))
+dt_qual <- as.data.table(read_parquet(paste0(out_qual_path, extr_date, "/",
+                                             extr_plat,"_qual_analysis.parquet")))
 
 # filter by platform
 # cut to statement and q_id
@@ -48,31 +48,40 @@ drop_cols <- c("uuid", "account_type", "decision_ground_reference_url",
 out_dq_clean <- data.table()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Clean Data ----
+# Define Data ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# loop through each file
-for(subfile in rel_files){
-  
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ## Output Progress ----
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  print(paste0("SOR CLEANING: ", extr_plat, " ", extr_date, ". File = ", subfile, " - START AT: ", Sys.time()))
-  
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ## Import Data ----
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- fread(file = paste0(paste0(map_platform[platform == extr_plat, output], extr_date, "/", subfile)),
-              drop = drop_cols)
-  
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ## Clean ----
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  if(nrow(dt) > 0){
+if(!(extr_plat %in% c(
+  "facebook",
+  "tiktok",
+  "instagram",
+  "snapchat"
+))){
+dt <- data.table()
+
+# Define Files & Paths
+pop_files_full <- file.path(paste0(map_platform[platform == extr_plat, output], extr_date),
+                            pop_files)
+
+dt <- rbindlist(lapply(pop_files_full, function(f) fread(f, drop = drop_cols)))
+
+} else if(extr_plat %in% c(
+  "facebook",
+  "tiktok",
+  "instagram",
+  "snapchat"
+)){
+  dt <- copy(dt_samp)
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+## Clean Data ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+if(nrow(dt) > 0){
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Platform Name ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[map_platforms, p_name := i.abkurzung , on = .(platform_name)][
+  dt[map_platforms, p_name := i.abkurzung , on = .(platform_name)][
     , platform_name := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -102,37 +111,37 @@ for(subfile in rel_files){
                                                          "(,|$)"),terr))]
   }
   
-  dt <- dt[, territorial_scope := NULL]
-  dt <- dt[, terr := NULL]
+  dt[, territorial_scope := NULL]
+  dt[, terr := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Created At ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, date := as.Date(created_at)][
+  dt[, date := as.Date(created_at)][
     , time := format(created_at, "%H:%M:%S")][, created_at := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Content Date ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, content_d := format(as.Date(content_date), "%Y-%m-%d")][
+  dt[, content_d := format(as.Date(content_date), "%Y-%m-%d")][
     , content_date := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Application Date ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, app_d := format(as.Date(application_date), "%Y-%m-%d")][
+  dt[, app_d := format(as.Date(application_date), "%Y-%m-%d")][
     , application_date := NULL]
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Automated Detection ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[map_auto, aut_det := i.abkurzung , on = .(automated_detection = des)][
+  dt[map_auto, aut_det := i.abkurzung , on = .(automated_detection = des)][
     , automated_detection := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Automated Decision ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[map_auto_des, aut_dec := i.abkurzung, on = .(automated_decision = des)][
+  dt[map_auto_des, aut_dec := i.abkurzung, on = .(automated_decision = des)][
     , automated_decision := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -144,12 +153,12 @@ for(subfile in rel_files){
   dt[, cont_type := sub("\\]$", "", cont_type)]
   dt[, cont_type := gsub('"', "", cont_type, fixed = TRUE)]
   
-  dt <- dt[map_cont, cont_type := i.abkurzung, on = .(cont_type = des)][
+  dt[map_cont, cont_type := i.abkurzung, on = .(cont_type = des)][
     , content_type := NULL]
   
   # adjust for multiple content types
   # lose some granularity in this adjustment but not often used
-  dt <- dt[, cont_type := ifelse(!(cont_type %in% map_cont[, abkurzung]),
+  dt[, cont_type := ifelse(!(cont_type %in% map_cont[, abkurzung]),
                                  "m", cont_type)]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -160,22 +169,22 @@ for(subfile in rel_files){
   dt[, cont_lang := sub("\\]$", "", cont_lang)]
   dt[, cont_lang := gsub('"', "", cont_lang, fixed = TRUE)]
   
-  dt <- dt[, cont_lang := tolower(cont_lang)][
+  dt[, cont_lang := tolower(cont_lang)][
     , content_language := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Source Type ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[map_source, source := i.abkurzung, on = .(source_type = des)][
+  dt[map_source, source := i.abkurzung, on = .(source_type = des)][
     , source_type := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Category ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[map_cat, cat := i.abkurzung, on = .(category = des)][
+  dt[map_cat, cat := i.abkurzung, on = .(category = des)][
     , category := NULL]
   
-  dt <- dt[, cat := ifelse(is.na(cat), 'historic', cat)]
+  dt[, cat := ifelse(is.na(cat), 'historic', cat)]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Category Specification ----
@@ -185,177 +194,144 @@ for(subfile in rel_files){
   dt[, category_specification := sub("\\]$", "", category_specification)]
   dt[, category_specification := gsub('"', "", category_specification, fixed = TRUE)]
   
-  dt <- dt[map_cat_spec, cat_spec := i.abkurzung, on = .(category_specification = des)][
+  dt[map_cat_spec, cat_spec := i.abkurzung, on = .(category_specification = des)][
     , category_specification := NULL]
   
-  dt <- dt[, cat_spec := ifelse(is.na(cat_spec), 'historic', cat_spec)]
+  dt[, cat_spec := ifelse(is.na(cat_spec), 'historic/empty', cat_spec)]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Category Specification Other ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, cat_spec_other := tolower(category_specification_other)]
+  dt[, cat_spec_other := tolower(category_specification_other)]
   
-  # find NA frequency
-  if (nrow(dt[!(is.na(cat_spec_other))]) != 0){
-    
-    # cut-down qualitative table
-    dt_qual_cut <- dt_qual[q == 'category_specification_other'][
-      ,.(statement, q_id)]
-    
-    # merge qualitative statement id
-    dt <- merge(dt, dt_qual_cut, by.x = 'cat_spec_other',
-                by.y = 'statement',
-                all.x = T)
-    
-    dt <- dt[, cat_spec_other := q_id][, q_id := NULL]
-    
-  } 
+  dt_qual_cut <- dt_qual[
+    q == "category_specification_other",
+    .(statement, q_id)
+  ]
   
-  dt <- dt [, category_specification_other := NULL]
+  dt[
+    dt_qual_cut,
+    cat_spec_other := i.q_id,
+    on = .(cat_spec_other = statement)
+  ]
+  
+  dt [, category_specification_other := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Decision Ground ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[map_des_ground, des_ground := i.abkurzung, on = .(decision_ground = des)][
+  dt[map_des_ground, des_ground := i.abkurzung, on = .(decision_ground = des)][
     , decision_ground := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Decision Facts ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, des_fact := tolower(decision_facts)]
+  dt[, des_fact := tolower(decision_facts)]
   
-  # find NA frequency
-  if (nrow(dt[!(is.na(des_fact))]) != 0){
-    
-    # cut-down qualitative table
-    dt_qual_cut <- dt_qual[q == 'decision_facts'][
-      ,.(statement, q_id)]
-    
-    # merge qualitative statement id
-    dt <- merge(dt, dt_qual_cut, by.x = 'des_fact',
-                by.y = 'statement',
-                all.x = T)
-    
-    dt <- dt[, des_fact := q_id][, q_id := NULL]
-    
-  } 
+  dt_qual_cut <- dt_qual[
+    q == "decision_facts",
+    .(statement, q_id)
+  ]
   
-  dt <- dt [, decision_facts := NULL]
+  setkey(dt_qual_cut, statement)
+  
+  dt[
+    dt_qual_cut,
+    des_fact := i.q_id,
+    on = .(des_fact = statement)
+  ]
+  
+  dt [, decision_facts := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Illegal Content Legal Ground ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, illegal_c_ground := tolower(illegal_content_legal_ground)]
+  dt[, illegal_c_ground := tolower(illegal_content_legal_ground)]
   
-  # find NA frequency
-  if (nrow(dt[!(is.na(illegal_c_ground))]) != 0){
-    
-    # cut-down qualitative table
-    dt_qual_cut <- dt_qual[q == 'illegal_content_legal_ground'][
-      ,.(statement, q_id)]
-    
-    # merge qualitative statement id
-    dt <- merge(dt, dt_qual_cut, by.x = 'illegal_c_ground',
-                by.y = 'statement',
-                all.x = T)
-    
-    dt <- dt[, illegal_c_ground := q_id][, q_id := NULL]
-    
-  } 
+  dt_qual_cut <- dt_qual[
+    q == "illegal_content_legal_ground",
+    .(statement, q_id)
+  ]
   
-  dt <- dt [, illegal_content_legal_ground := NULL]
+  dt[
+    dt_qual_cut,
+    illegal_c_ground := i.q_id,
+    on = .(illegal_c_ground = statement)
+  ]
+  
+  dt [, illegal_content_legal_ground := NULL]
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Illegal Content Explanation ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, illegal_c_ex := tolower(illegal_content_explanation)]
+  dt[, illegal_c_ex := tolower(illegal_content_explanation)]
   
-  # find NA frequency
-  if (nrow(dt[!(is.na(illegal_c_ex))]) != 0){
-    
-    # cut-down qualitative table
-    dt_qual_cut <- dt_qual[q == 'illegal_content_explanation'][
-      ,.(statement, q_id)]
-    
-    # merge qualitative statement id
-    dt <- merge(dt, dt_qual_cut, by.x = 'illegal_c_ex',
-                by.y = 'statement',
-                all.x = T)
-    
-    dt <- dt[, illegal_c_ex := q_id][, q_id := NULL]
-    
-  } 
+  dt_qual_cut <- dt_qual[
+    q == "illegal_content_explanation",
+    .(statement, q_id)
+  ]
   
-  dt <- dt [, illegal_content_explanation := NULL]
+  dt[
+    dt_qual_cut,
+    illegal_c_ex := i.q_id,
+    on = .(illegal_c_ex = statement)
+  ]
+  
+  dt [, illegal_content_explanation := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Incompatible Content Ground ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, incomp_c_ground := tolower(incompatible_content_ground)]
+  dt[, incomp_c_ground := tolower(incompatible_content_ground)]
   
-  # find NA frequency
-  if (nrow(dt[!(is.na(incomp_c_ground))]) != 0){
-    
-    # cut-down qualitative table
-    dt_qual_cut <- dt_qual[q == 'incompatible_content_ground'][
-      ,.(statement, q_id)]
-    
-    # merge qualitative statement id
-    dt <- merge(dt, dt_qual_cut, by.x = 'incomp_c_ground',
-                by.y = 'statement',
-                all.x = T)
-    
-    dt <- dt[, incomp_c_ground := q_id][, q_id := NULL]
-    
-  } 
+  dt_qual_cut <- dt_qual[
+    q == "incompatible_content_ground",
+    .(statement, q_id)
+  ]
   
-  dt <- dt [, incompatible_content_ground := NULL]
+  dt[
+    dt_qual_cut,
+    incomp_c_ground := i.q_id,
+    on = .(incomp_c_ground = statement)
+  ]
+  
+  dt [, incompatible_content_ground := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Incompatible Content Explanation ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, incomp_c_ex := tolower(incompatible_content_explanation)]
+  dt[, incomp_c_ex := tolower(incompatible_content_explanation)]
   
-  # find NA frequency
-  if (nrow(dt[!(is.na(incomp_c_ex))]) != 0){
-    
-    # cut-down qualitative table
-    dt_qual_cut <- dt_qual[q == 'incompatible_content_explanation'][
-      ,.(statement, q_id)]
-    
-    # merge qualitative statement id
-    dt <- merge(dt, dt_qual_cut, by.x = 'incomp_c_ex',
-                by.y = 'statement',
-                all.x = T)
-    
-    dt <- dt[, incomp_c_ex := q_id][, q_id := NULL]
-    
-  } 
+  dt_qual_cut <- dt_qual[
+    q == "incompatible_content_explanation",
+    .(statement, q_id)
+  ]
   
-  dt <- dt [, incompatible_content_explanation := NULL]
+  dt[
+    dt_qual_cut,
+    incomp_c_ex := i.q_id,
+    on = .(incomp_c_ex = statement)
+  ]
+  
+  dt [, incompatible_content_explanation := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Incompatible Content Illegal ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, incomp_c_illegal:= tolower(incompatible_content_illegal)]
+  dt[, incomp_c_illegal:= tolower(incompatible_content_illegal)]
   
-  # find NA frequency
-  if (nrow(dt[!(is.na(incomp_c_illegal))]) != 0){
-    
-    # cut-down qualitative table
-    dt_qual_cut <- dt_qual[q == 'incompatible_content_illegal'][
-      ,.(statement, q_id)]
-    
-    # merge qualitative statement id
-    dt <- merge(dt, dt_qual_cut, by.x = 'incomp_c_illegal',
-                by.y = 'statement',
-                all.x = T)
-    
-    dt <- dt[, incomp_c_illegal := q_id][, q_id := NULL]
-    
-  } 
+  dt_qual_cut <- dt_qual[
+    q == "incompatible_content_illegal",
+    .(statement, q_id)
+  ]
   
-  dt <- dt [, incompatible_content_illegal := NULL]
+  dt[
+    dt_qual_cut,
+    incomp_c_illegal := i.q_id,
+    on = .(incomp_c_illegal = statement)
+  ]
+  
+  dt [, incompatible_content_illegal := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Decision Visibility ----
@@ -367,21 +343,21 @@ for(subfile in rel_files){
   dt[, des_vis := gsub('"', "", des_vis, fixed = TRUE)]
   
   # empty cell format
-  dt <- dt[, des_vis := ifelse(des_vis == '', NA, des_vis)]
+  dt[, des_vis := ifelse(des_vis == '', NA, des_vis)]
   
-  dt <- dt[map_des_vis, des_vis := i.abkurzung, on = .(des_vis = des)][
+  dt[map_des_vis, des_vis := i.abkurzung, on = .(des_vis = des)][
     , decision_visibility := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Decision Visibility Other ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, des_vis_other := tolower(decision_visibility_other)][
+  dt[, des_vis_other := tolower(decision_visibility_other)][
     , decision_visibility_other := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## End Date Visibility Restriction ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, des_vis_end_date := format(as.Date(end_date_visibility_restriction), "%Y-%m-%d")][
+  dt[, des_vis_end_date := format(as.Date(end_date_visibility_restriction), "%Y-%m-%d")][
     , end_date_visibility_restriction := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -394,21 +370,21 @@ for(subfile in rel_files){
   dt[, des_mon := gsub('"', "", des_mon, fixed = TRUE)]
   
   # empty cell format
-  dt <- dt[, des_mon := ifelse(des_mon == '', NA, des_mon)]
+  dt[, des_mon := ifelse(des_mon == '', NA, des_mon)]
   
-  dt <- dt[map_des_mon, des_mon := i.abkurzung, on = .(des_mon = des)][
+  dt[map_des_mon, des_mon := i.abkurzung, on = .(des_mon = des)][
     , decision_monetary := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Decision Monetary Other ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, des_mon_other := tolower(decision_monetary_other)][
+  dt[, des_mon_other := tolower(decision_monetary_other)][
     , decision_monetary_other := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## End Date Monetary Restriction ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, des_mon_end_date := format(as.Date(end_date_monetary_restriction), "%Y-%m-%d")][
+  dt[, des_mon_end_date := format(as.Date(end_date_monetary_restriction), "%Y-%m-%d")][
     , end_date_monetary_restriction := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
@@ -421,29 +397,29 @@ for(subfile in rel_files){
   dt[, des_prov := gsub('"', "", des_prov, fixed = TRUE)]
   
   # empty cell format
-  dt <- dt[, des_prov := ifelse(des_prov == '', NA, des_prov)]
+  dt[, des_prov := ifelse(des_prov == '', NA, des_prov)]
   
-  dt <- dt[map_des_prov, des_prov := i.abkurzung, on = .(des_prov = des)][
+  dt[map_des_prov, des_prov := i.abkurzung, on = .(des_prov = des)][
     , decision_provision := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## End Date Service Restriction ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, des_prov_end_date := format(as.Date(end_date_service_restriction), "%Y-%m-%d")][
+  dt[, des_prov_end_date := format(as.Date(end_date_service_restriction), "%Y-%m-%d")][
     , end_date_service_restriction := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Decision Account ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, decision_account := ifelse(decision_account == '', NA, decision_account)]
+  dt[, decision_account := ifelse(decision_account == '', NA, decision_account)]
   
-  dt <- dt[map_des_acc, des_acc := i.abkurzung, on = .(decision_account = des)][
+  dt[map_des_acc, des_acc := i.abkurzung, on = .(decision_account = des)][
     , decision_account := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## End Date Account Restriction ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt <- dt[, des_acc_end_date := format(as.Date(end_date_account_restriction), "%Y-%m-%d")][
+  dt[, des_acc_end_date := format(as.Date(end_date_account_restriction), "%Y-%m-%d")][
     , end_date_account_restriction := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -451,6 +427,11 @@ for(subfile in rel_files){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   # set column order as defined in 'xx_config.R'
   setcolorder(dt, neworder = cols_order)
+  
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ## Remove File Column ----
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~
+  dt[, file := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Data Quality ----
@@ -462,21 +443,15 @@ for(subfile in rel_files){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Export ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  write_parquet(dt, paste0(out_clean_path, extr_date, "-", extr_plat, "/", subfile ,".parquet"))
+  write_parquet(dt, paste0(out_clean_path, extr_date, "-", extr_plat, "/", extr_plat, ".parquet"))
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   ## Clean ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   rm(dt)
   
-  }
-  
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ## Output Progress ----
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  print(paste0("SOR CLEANING: ", extr_plat, " ", extr_date, ". File = ", subfile, " - FINISHED AT: ", Sys.time()))
-
 }
+print(paste0("SOR CLEANING: ", extr_plat, " ", extr_date, " - END AT: ", Sys.time()))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Data Quality Export ----
@@ -499,12 +474,16 @@ if(!dir.exists(file_path)) {
 }
 
 # Export
-fwrite(out_dq_clean, file = paste0(out_dq_path, extr_date, "/", extr_plat,"_clean.csv"),
-       row.names = FALSE)
+write_parquet(out_dq_clean, paste0(out_dq_path, extr_date, "/", extr_plat,"_clean.parquet"))
 
 print(paste0("CLEANING DATA QUALITY: ", extr_plat, " ", extr_date, " - EXPORT COMPLETE AT ", Sys.time()))
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean Up ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Remove local files
 rm(dt_qual, dt_qual_cut, out_dq_clean)
+
+# Remove Staged Sample
+rm(dt_samp)
+gc()

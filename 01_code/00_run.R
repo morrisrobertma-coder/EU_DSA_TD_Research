@@ -56,8 +56,15 @@ aut_man <- "Y"
 # After run should ALL available results be amalgamated? 
 collect <- "N"
 
-# Run ONLY COLLECTION? - No calculation pipeline.
+# Run ONLY COLLECTION? - No calculation pipeline
 collection_only <- "N"
+
+# Collection Parameters
+collect_dq <- "Y"
+collect_qual <- "Y"
+collect_rq1 <- "Y"
+collect_rq2 <- "Y"
+collect_rq3 <- "Y"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run Data Pipeline ----

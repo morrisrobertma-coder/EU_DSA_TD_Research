@@ -27,102 +27,267 @@ steps <- as.data.table(tibble::tribble(
   "rq2", out_rq2,
   "rq3", out_rq3))
 
-# Loop Over All Pipeline Steps
-for (s in 1:nrow(steps)){
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Data Quality ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if(collect_dq == "Y"){
   
-  # Define Outputs
-  out_dt <- data.table()
-  out_dq_clean <- data.table()
+  print(paste0("RESULT COLLECTION - STEP : DATA QUALITY - START AT ", Sys.time()))
   
-  # Extract Step
-  step <- steps[s, step]
-  step_path <- steps[s, path]
+  # Find All CSV Files
+  all_files <- list.files(path = out_dq_path,
+                          pattern = "\\.csv$",
+                          recursive = TRUE,
+                          full.names = TRUE)
   
-  print(paste0("RESULT COLLECTION - STEP : ", step, " - START AT ", Sys.time()))
+  # Split into DQ and Clean DQ
+  dq_clean_files <- all_files[grepl("_clean\\.csv$", basename(all_files))]
+  dq_raw_files <- all_files[!grepl("_clean\\.csv$", basename(all_files))]
   
-  # Find All Folders
-  agg_files <- list.files(step_path)
+  # Read and Append All Data
+  dq_clean_data <- rbindlist(lapply(dq_clean_files, fread), fill = TRUE)
+  dq_raw_data <- rbindlist(lapply(dq_raw_files, fread), fill = TRUE)
   
-  for (i in agg_files){
-    
-    print(paste0("RESULT COLLECTION - STEP : ", step, " - DATE : ", i, " - START AT ", Sys.time()))
-    # Identify Files in Sub-Folder
-    avail_files <- list.files(paste0(step_path, i))
-    
-    # Split DQ Raw & Clean Files
-    avail_files_raw <- avail_files[!grepl("_clean", avail_files)]
-    avail_files_clean <- avail_files[grepl("_clean", avail_files)]
-    
-    # Process Files
-    if(length(avail_files_raw) > 0){
-      
-      for (j in avail_files_raw){
-        
-        # Check File Type
-        parq_or_csv <- grepl(".parquet", j)
-        
-        if(parq_or_csv){
-          dt <- as.data.table(read_parquet(file = paste0(step_path, i, "/", j)))
-          
-        } else {
-          # Import File
-          dt <- fread(paste0(step_path, i, "/", j))
-        }
-        
-        # Bind to Output
-        out_dt <- rbind(out_dt,
-                        dt, fill = TRUE)
-        }
-      
-    } else {
-      print("No available files for collection")
-    }
-    
-    # Process DQ Clean Files
-    if(length(avail_files_clean) > 0){
-
-        for (t in avail_files_clean){
-          # Import File
-          dt_dq_clean <- fread(paste0(step_path, i, "/", t))
-          
-          # Bind to Output
-          out_dq_clean <- rbind(out_dq_clean,
-                                dt_dq_clean,
-                                fill = TRUE)
-          }
-      
-      } else {
-      print("No available dq clean files for collection")
-      }
-    print(paste0("RESULT COLLECTION - STEP : ", step, " - DATE : ", i, " - END AT ", Sys.time()))
-  }
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  # Format & Upload Data ----
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  print(paste0("RESULT COLLECTION - STEP : ", step, " - EXPORT ", Sys.time()))
+  # Export
+  write_parquet(dq_clean_data, paste0(file_path,"/dq_clean.parquet"))
+  write_parquet(dq_raw_data, paste0(file_path,"/dq.parquet"))
   
-  export_dt <- copy(out_dt)[, runtime := paste0(Sys.time())]
-  setcolorder(export_dt, c("runtime", "platform", "date"))
-  export_dt[is.na(export_dt)] <- 0
-  write_parquet(export_dt, paste0(file_path,"/", step, ".parquet"))
+  # Clean
+  rm(dq_clean_data)
+  rm(dq_raw_data)
   
-  if(nrow(out_dq_clean) > 0){
-  export_dq_clean <- copy(out_dq_clean)[, runtime := paste0(Sys.time())]
-  setcolorder(export_dq_clean, c("runtime", "platform", "date"))
-  export_dq_clean[is.na(export_dq_clean)] <- 0
-  write_parquet(export_dq_clean, paste0(file_path,"/", "dq_clean.parquet"))
-  }
-  print(paste0("RESULT COLLECTION - STEP : ", step, " - EXPORT COMPLETE ", Sys.time()))
-  print(paste0("RESULT COLLECTION - STEP : ", step, " - END AT ", Sys.time()))
-
+  print(paste0("RESULT COLLECTION - STEP : DATA QUALITY - END AT ", Sys.time()))
+  
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Clean Up ----
+# Qualitative ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-rm(dt)
-rm(dt_dq_clean)
-rm(out_dt)
-rm(out_dq_clean)
+if(collect_qual == "Y"){
+  
+  print(paste0("RESULT COLLECTION - STEP : QUALITATIVE ANALYSIS - START AT ", Sys.time()))
+  
+  # Find All CSV Files
+  all_files_csv <- list.files(path = out_qual_path,
+                          pattern = "\\.csv$",
+                          recursive = TRUE,
+                          full.names = TRUE)
+
+  # Read and Append All Data - CSV
+  qual_data_csv <- rbindlist(lapply(all_files_csv, fread), fill = TRUE)
+  
+  if(nrow(qual_data_csv)> 0){
+    qual_data_csv[
+      , date := as.Date(date)]
+  }
+  
+  # Find All Parquet Files
+  all_files_par <- list.files(path = out_qual_path,
+                              pattern = "\\.parquet$",
+                              recursive = TRUE,
+                              full.names = TRUE)
+  
+  qual_data_par <- rbindlist(lapply(all_files_par, read_parquet), fill = TRUE)
+  
+  if(nrow(qual_data_par) > 0){
+    qual_data_par[
+      , date := as.Date(date)]
+  }
+  
+  # Bind All
+  qual_data <- rbind(qual_data_csv,
+                     qual_data_par)
+  
+  # Export
+  write_parquet(qual_data, paste0(file_path,"/qual.parquet"))
+  
+  # Clean
+  rm(qual_data)
+
+  print(paste0("RESULT COLLECTION - STEP : QUALITATIVE ANALYSIS - END AT ", Sys.time()))
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# RQ1 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if(collect_rq1 == "Y"){
+  
+  print(paste0("RESULT COLLECTION - STEP : RESEARCH QUESTION 1 - START AT ", Sys.time()))
+  
+  # Find All CSV Files
+  all_files_csv <- list.files(path = out_rq1,
+                              pattern = "\\.csv$",
+                              recursive = TRUE,
+                              full.names = TRUE)
+  
+  # Read and Append All Data - CSV
+  rq1_data_csv <- rbindlist(lapply(all_files_csv, fread), fill = TRUE)
+  
+  if(nrow(rq1_data_csv) > 0){
+    rq1_data_csv[
+    , date := as.Date(date)]
+  }
+  
+  # Find All Parquet Files
+  all_files_par <- list.files(path = out_rq1,
+                              pattern = "\\.parquet$",
+                              recursive = TRUE,
+                              full.names = TRUE)
+  
+  rq1_data_par <- rbindlist(lapply(all_files_par, read_parquet), fill = TRUE)
+  
+  if(nrow(rq1_data_par) > 0){
+    rq1_data_par[
+      , date := as.Date(date)]
+  }
+  
+  # Bind All
+  rq1_data <- rbind(rq1_data_csv,
+                    rq1_data_par)
+  
+  # Export
+  write_parquet(rq1_data, paste0(file_path,"/rq1.parquet"))
+  
+  # Clean
+  rm(rq1_data)
+  
+  print(paste0("RESULT COLLECTION - STEP : RESEARCH QUESTION 1 - END AT ", Sys.time()))
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# RQ2 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if(collect_rq2 == "Y"){
+  
+  print(paste0("RESULT COLLECTION - STEP : RESEARCH QUESTION 2 - START AT ", Sys.time()))
+  
+  # Find All CSV Files
+  all_files_csv <- list.files(path = out_rq2,
+                              pattern = "\\.csv$",
+                              recursive = TRUE,
+                              full.names = TRUE)
+  
+  # Read and Append All Data - CSV
+  rq2_data_csv <- rbindlist(lapply(all_files_csv, fread), fill = TRUE)
+  
+  if(nrow(rq2_data_csv) > 0){
+    rq2_data_csv[
+      , date := as.Date(date)]
+  }
+  
+  # Find All Parquet Files
+  all_files_par <- list.files(path = out_rq2,
+                              pattern = "\\.parquet$",
+                              recursive = TRUE,
+                              full.names = TRUE)
+  
+  rq2_data_par <- rbindlist(lapply(all_files_par, read_parquet), fill = TRUE)
+  
+  if(nrow(rq2_data_par) > 0){
+    rq2_data_par[
+      , date := as.Date(date)]
+  }
+  
+  # Bind All
+  rq2_data <- rbind(rq2_data_csv,
+                    rq2_data_par)
+  
+  # Export
+  write_parquet(rq2_data, paste0(file_path,"/rq2.parquet"))
+  
+  # Clean
+  rm(rq2_data)
+  
+  print(paste0("RESULT COLLECTION - STEP : RESEARCH QUESTION 2 - END AT ", Sys.time()))
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# RQ3 ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+if(collect_rq3 == "Y"){
+  
+  print(paste0("RESULT COLLECTION - STEP : RESEARCH QUESTION 3 QUALITATIVE - START AT ", Sys.time()))
+  
+  # Find All CSV Files
+  all_files_csv <- list.files(path = out_rq3,
+                              pattern = "\\qual.csv$",
+                              recursive = TRUE,
+                              full.names = TRUE)
+  
+  # Read and Append All Data - CSV
+  rq3_data_csv <- rbindlist(lapply(all_files_csv, fread), fill = TRUE)
+  
+  if(nrow(rq3_data_csv) > 0){
+    rq3_data_csv[
+      , date := as.Date(date)]
+  }
+  
+  # Find All Parquet Files
+  all_files_par <- list.files(path = out_rq3,
+                              pattern = "\\qual.parquet$",
+                              recursive = TRUE,
+                              full.names = TRUE)
+  
+  rq3_data_par <- rbindlist(lapply(all_files_par, read_parquet), fill = TRUE)
+  
+  if(nrow(rq3_data_par) > 0){
+    rq3_data_par[
+      , date := as.Date(date)]
+  }
+  
+  # Bind All
+  rq3_data <- rbind(rq3_data_csv,
+                    rq3_data_par)
+  
+  # Export
+  write_parquet(rq3_data, paste0(file_path,"/rq3_qual.parquet"))
+  
+  # Clean
+  rm(rq3_data)
+  
+  print(paste0("RESULT COLLECTION - STEP : RESEARCH QUESTION 3 QUALITATIVE - END AT ", Sys.time()))
+  
+  print(paste0("RESULT COLLECTION - STEP : RESEARCH QUESTION 3 QUANTITATIVE - START AT ", Sys.time()))
+  
+  # Find All CSV Files
+  all_files_csv <- list.files(path = out_rq3,
+                              pattern = "\\quant.csv$",
+                              recursive = TRUE,
+                              full.names = TRUE)
+  
+  # Read and Append All Data - CSV
+  rq3_data_csv <- rbindlist(lapply(all_files_csv, fread), fill = TRUE)
+  
+  if(nrow(rq3_data_csv) > 0){
+    rq3_data_csv[
+      , date := as.Date(date)]
+  }
+  
+  # Find All Parquet Files
+  all_files_par <- list.files(path = out_rq3,
+                              pattern = "\\quant.parquet$",
+                              recursive = TRUE,
+                              full.names = TRUE)
+  
+  rq3_data_par <- rbindlist(lapply(all_files_par, read_parquet), fill = TRUE)
+  
+  if(nrow(rq3_data_par) > 0){
+    rq3_data_par[
+      , date := as.Date(date)]
+  }
+  
+  # Bind All
+  rq3_data <- rbind(rq3_data_csv,
+                    rq3_data_par)
+  
+  # Export
+  write_parquet(rq3_data, paste0(file_path,"/rq3_quant.parquet"))
+  
+  # Clean
+  rm(rq3_data)
+  
+  print(paste0("RESULT COLLECTION - STEP : RESEARCH QUESTION 3 QUANTITATIVE - END AT ", Sys.time()))
+}
+
 
 print(paste0("RESULT COLLECTION: - END AT ", Sys.time()))

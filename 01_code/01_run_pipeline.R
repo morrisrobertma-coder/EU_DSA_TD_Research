@@ -82,30 +82,18 @@ if (collection_only == "N"){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Platform Level Data Quality
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if(extr_plat == "facebook" | extr_plat == "snapchat" | extr_plat == "instagram" | extr_plat == "tiktok"){
-      source(paste0(inp_code,"00_data_processing/02_dq_test.R"))
-    } else {
-      source(paste0(inp_code,"00_data_processing/02_dq.R"))
-    }
-    
+    source(paste0(inp_code,"00_data_processing/02_dq.R"))
+
     if(stop_pipeline_dead == "FALSE"){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Qualitative Analysis
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if(extr_plat == "facebook" | extr_plat == "snapchat" | extr_plat == "instagram" | extr_plat == "tiktok"){
-    source(paste0(inp_code,"01_qual/01_qual_test.R"))
-    } else {
-      source(paste0(inp_code,"01_qual/01_qual.R"))
-    }
-      
+    source(paste0(inp_code,"01_qual/01_qual.R"))
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Data Cleaning
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    if(extr_plat == "facebook" | extr_plat == "snapchat" | extr_plat == "instagram" | extr_plat == "tiktok"){
-      source(paste0(inp_code,"00_data_processing/03_clean_test2.R"))
-    } else {
     source(paste0(inp_code,"00_data_processing/03_clean.R"))
-    }
       
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Upstream Data Deletion
