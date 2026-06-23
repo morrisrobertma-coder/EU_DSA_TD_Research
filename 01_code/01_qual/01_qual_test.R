@@ -31,7 +31,12 @@ cols_of_interest <- c('incompatible_content_ground','incompatible_content_explan
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 if(length(rel_files) > 0){
   
-  if(extr_plat != "facebook" | extr_plat != "tiktok" | extr_plat != "instagram"| extr_plat != "snapchat"){
+  if(!(extr_plat %in% c(
+    "facebook",
+    "tiktok",
+    "instagram",
+    "snapchat"
+  ))){
   dt <- data.table()
   
   # Define Files & Paths
@@ -41,7 +46,12 @@ if(length(rel_files) > 0){
   # Import Data
   dt <- rbindlist(lapply(pop_files_full, function(f) fread(f, select = cols_of_interest)))
   
-  } else if(extr_plat == "facebook" | extr_plat == "tiktok" | extr_plat == "instagram" | extr_plat == "snapchat"){
+  } else if(extr_plat %in% c(
+    "facebook",
+    "tiktok",
+    "instagram",
+    "snapchat"
+  )){
     dt <- copy(dt_samp)
   }
   
@@ -145,8 +155,7 @@ if(!dir.exists(file_path)) {
 }
 
 # Export
-fwrite(out_all, file = paste0(out_qual_path, extr_date, "/", extr_plat, "_qual_analysis.csv"),
-          row.names = FALSE)
+write_parquet(out_all, paste0(out_qual_path, extr_date, "/", extr_plat, "_qual_analysis.parquet"))
 
 print(paste0("QUALITATIVE ANALYSIS: ", extr_plat, " - ", extr_date, " - EXPORT COMPLETE AT ", Sys.time()))
 

@@ -102,7 +102,7 @@ if (collection_only == "N"){
     # Run Data Cleaning
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     if(extr_plat == "facebook" | extr_plat == "snapchat" | extr_plat == "instagram" | extr_plat == "tiktok"){
-      source(paste0(inp_code,"00_data_processing/03_clean_test.R"))
+      source(paste0(inp_code,"00_data_processing/03_clean_test2.R"))
     } else {
     source(paste0(inp_code,"00_data_processing/03_clean.R"))
     }

@@ -30,7 +30,12 @@ table_dq <- function(check, t, v){
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Define Data
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if(extr_plat != "facebook" | extr_plat != "tiktok" | extr_plat != "instagram" | extr_plat != "snapchat"){
+if(!(extr_plat %in% c(
+  "facebook",
+  "tiktok",
+  "instagram",
+  "snapchat"
+))){
 dt_dq <- data.table()
 
 # Define Files & Paths
@@ -42,7 +47,12 @@ dt_dq <- rbindlist(lapply(pop_files_full, function(f) {
                    dt <- fread(f)
                    dt[, file := basename(f)]}))
 
-} else if(extr_plat == "facebook" | extr_plat == "tiktok" | extr_plat == "instagram" | extr_plat == "snapchat"){
+} else if(extr_plat %in% c(
+  "facebook",
+  "tiktok",
+  "instagram",
+  "snapchat"
+)){
   dt_dq <- copy(dt_samp)
 }
 
