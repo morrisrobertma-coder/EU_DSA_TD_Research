@@ -22,7 +22,7 @@ out_qual <- data.table(q = '',
 # Define Columns of Interest
 cols_of_interest <- c('incompatible_content_ground','incompatible_content_explanation',
                       'incompatible_content_illegal',
-                      'decision_facts','category_specification_other',
+                      'decision_facts','decision_visibility_other','category_specification_other',
                       'illegal_content_legal_ground',
                       'illegal_content_explanation')
 
@@ -82,6 +82,11 @@ if(nrow(dt) > 0){
   qual_3 <- dt[,.(freq = .N), by = "decision_facts"][
     , q := "decision_facts"]
   colnames(qual_3) <- c('statement','freq','q') 
+  
+  # decision visibility other
+  qual_3_1 <- dt[,.(freq = .N), by = "decision_visibility_other"][
+    , q := "decision_visibility_other"]
+  colnames(qual_3_1) <- c('statement','freq','q')
     
   # category specification other
   qual_4 <- dt[,.(freq = .N), by = "category_specification_other"][
@@ -99,7 +104,7 @@ if(nrow(dt) > 0){
   colnames(qual_6) <- c('statement','freq','q')
   
   # bind all outputs
-  out <- rbind(qual_1, qual_2, qual_2_1, qual_3, qual_4, qual_5, qual_6)
+  out <- rbind(qual_1, qual_2, qual_2_1, qual_3, qual_3_1, qual_4, qual_5, qual_6)
   
   # change colnames
   setcolorder(out, neworder = c('q'))
@@ -139,7 +144,7 @@ if(nrow(out_qual) > 1){
   out_all <- rbind(out_all,
                    out_qual)
   
-  }
+}
 
 if(nrow(out_all) > 0){
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

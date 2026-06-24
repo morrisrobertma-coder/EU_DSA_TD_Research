@@ -29,13 +29,13 @@ if(!dir.exists(file_path)) {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Import Qualitative Analysis Results ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-dt_qual_imp <- as.data.table(fread(file = paste0(out_qual_path, extr_date, "/",
-                                             extr_plat,"_qual_analysis.csv")))
+dt_qual_imp <- as.data.table(read_parquet(paste0(out_qual_path, extr_date, "/",
+                                             extr_plat,"_qual_analysis.parquet")))
 
 # filter by platform
 # cut to statement and q_id
 dt_qual_imp <- dt_qual_imp[platform == extr_plat][
-  ,.(statement, q, q_id)]
+  ,.(statement, q, q_id)][, q_id := as.character(q_id)]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Data Analysis ----
@@ -87,6 +87,7 @@ for(subfile in rel_files){
     
     if (length(ill_ids) > 0){
     dt_qual <- dt_qual[sor_id %in% ill_ids, illegal_flag := 1]
+    dt_qual[, illegal_flag := ifelse(is.na(illegal_flag), 0, illegal_flag)]
     } else {
       dt_qual <- dt_qual[, illegal_flag := 0]
     }

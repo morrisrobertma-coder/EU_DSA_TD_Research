@@ -220,7 +220,7 @@ map_des_vis <- as.data.table(tibble::tribble(
   "DECISION_VISIBILITY_CONTENT_AGE_RESTRICTED","ar",
   "DECISION_VISIBILITY_CONTENT_INTERACTION_RESTRICTED","ir",
   "DECISION_VISIBILITY_CONTENT_LABELLED","lab",
-  "DECISION_VISIBILITY_OTHER","o",))
+  "DECISION_VISIBILITY_OTHER","o"))
 
 ### Decision Monetary ----
 map_des_mon <- as.data.table(tibble::tribble(

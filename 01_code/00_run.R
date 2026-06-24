@@ -39,7 +39,7 @@ plat_man_month_date <- '01'
 plat_man_month_year <- '2025'
 
 # One File Approach - Define File/Date Combination
-global_file_man <- "sor-facebook-2025-03-01-full.zip"
+global_file_man <- "sor-youtube-2026-01-01-full.zip"
 
 # Define Automation - Aut = 'Y' = Run All Global Files
 #                     Aut Plat = 'Y' = Run One Selected Platform
@@ -74,5 +74,5 @@ source(paste0(inp_code, "01_run_pipeline.R"))
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Clean-Up ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-gc()
 rm(list = ls())
+gc()

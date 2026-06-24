@@ -71,6 +71,9 @@ dt <- rbindlist(lapply(pop_files_full, function(f) fread(f, drop = drop_cols)))
   "snapchat"
 )){
   dt <- copy(dt_samp)
+  colnames_to_extract <- setdiff(colnames(dt), drop_cols)
+  colnames_to_extract <- setdiff(colnames_to_extract, "file")
+  dt <- dt[, ..colnames_to_extract]
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -153,13 +156,30 @@ if(nrow(dt) > 0){
   dt[, cont_type := sub("\\]$", "", cont_type)]
   dt[, cont_type := gsub('"', "", cont_type, fixed = TRUE)]
   
-  dt[map_cont, cont_type := i.abkurzung, on = .(cont_type = des)][
-    , content_type := NULL]
+  if (extr_plat == "youtube") {
+    
+    map_vec <- setNames(
+      map_cont$abkurzung,
+      map_cont$des
+    )
+    
+    dt[, cont_type :=
+         sapply(
+           strsplit(cont_type, ",", fixed = TRUE),
+           function(x) {
+             paste(map_vec[x], collapse = "_and_")
+           }
+         )]
+    
+  } else {
   
-  # adjust for multiple content types
-  # lose some granularity in this adjustment but not often used
-  dt[, cont_type := ifelse(!(cont_type %in% map_cont[, abkurzung]),
-                                 "m", cont_type)]
+  dt[map_cont, 
+     cont_type := i.abkurzung,
+     on = .(cont_type = des)]
+    
+  }
+  
+  dt[, content_type := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Content Language ----
@@ -184,7 +204,7 @@ if(nrow(dt) > 0){
   dt[map_cat, cat := i.abkurzung, on = .(category = des)][
     , category := NULL]
   
-  dt[, cat := ifelse(is.na(cat), 'historic', cat)]
+  dt[, cat := ifelse(is.na(cat), 'historic_or_empty', cat)]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Category Specification ----
@@ -197,7 +217,7 @@ if(nrow(dt) > 0){
   dt[map_cat_spec, cat_spec := i.abkurzung, on = .(category_specification = des)][
     , category_specification := NULL]
   
-  dt[, cat_spec := ifelse(is.na(cat_spec), 'historic/empty', cat_spec)]
+  dt[, cat_spec := ifelse(is.na(cat_spec), 'historic_or_empty', cat_spec)]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Category Specification Other ----
@@ -345,14 +365,40 @@ if(nrow(dt) > 0){
   # empty cell format
   dt[, des_vis := ifelse(des_vis == '', NA, des_vis)]
   
-  dt[map_des_vis, des_vis := i.abkurzung, on = .(des_vis = des)][
-    , decision_visibility := NULL]
+  if (extr_plat == "tiktok"){
+    
+    map_vec <- setNames(
+      map_des_vis$abkurzung,
+      map_des_vis$des)
+    
+    dt[, des_vis :=
+         sapply(
+           strsplit(des_vis, ",", fixed = TRUE),
+           function(x) paste(map_vec[x], collapse = "_and_"))]
+  
+  } else {
+    dt[map_des_vis, des_vis := i.abkurzung, on = .(des_vis = des)]
+  }
+  
+  dt[, decision_visibility := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Decision Visibility Other ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt[, des_vis_other := tolower(decision_visibility_other)][
-    , decision_visibility_other := NULL]
+  dt[, des_vis_other := tolower(decision_visibility_other)]
+  
+  dt_qual_cut <- dt_qual[
+    q == "decision_visibility_other",
+    .(statement, q_id)
+  ]
+  
+  dt[
+    dt_qual_cut,
+    des_vis_other := i.q_id,
+    on = .(des_vis_other = statement)
+  ]
+  
+  dt[, decision_visibility_other := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## End Date Visibility Restriction ----
@@ -428,11 +474,6 @@ if(nrow(dt) > 0){
   # set column order as defined in 'xx_config.R'
   setcolorder(dt, neworder = cols_order)
   
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  ## Remove File Column ----
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~
-  dt[, file := NULL]
-  
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Data Quality ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -449,6 +490,7 @@ if(nrow(dt) > 0){
   ## Clean ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~
   rm(dt)
+  gc()
   
 }
 print(paste0("SOR CLEANING: ", extr_plat, " ", extr_date, " - END AT: ", Sys.time()))
@@ -485,5 +527,5 @@ print(paste0("CLEANING DATA QUALITY: ", extr_plat, " ", extr_date, " - EXPORT CO
 rm(dt_qual, dt_qual_cut, out_dq_clean)
 
 # Remove Staged Sample
-rm(dt_samp)
+if (exists("dt_samp")) rm(dt_samp)
 gc()

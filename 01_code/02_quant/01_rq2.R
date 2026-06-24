@@ -18,10 +18,10 @@ rel_files <- list.files(paste0(out_clean_path, extr_date, "-", extr_plat,"/"))
 # Set Up Output File ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Check for folder
-file_path <- paste0(out_rq1, extr_date)
+file_path <- paste0(out_rq2, extr_date)
 
 if(!dir.exists(file_path)) {
-  dir.create(paste0(out_rq1, extr_date))
+  dir.create(paste0(out_rq2, extr_date))
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -145,6 +145,9 @@ if(collect_rq1 == "Y"){
   rq1_data <- rbind(rq1_data_csv,
                     rq1_data_par)
   
+  # Fix NAs
+  rq1_data[is.na(rq1_data)] <- 0
+  
   # Export
   write_parquet(rq1_data, paste0(file_path,"/rq1.parquet"))
   
@@ -191,6 +194,9 @@ if(collect_rq2 == "Y"){
   # Bind All
   rq2_data <- rbind(rq2_data_csv,
                     rq2_data_par)
+  
+  # Fix NAs
+  rq2_data[is.na(rq2_data)] <- 0
   
   # Export
   write_parquet(rq2_data, paste0(file_path,"/rq2.parquet"))
@@ -279,6 +285,9 @@ if(collect_rq3 == "Y"){
   # Bind All
   rq3_data <- rbind(rq3_data_csv,
                     rq3_data_par)
+  
+  # Fix NAs
+  rq3_data[is.na(rq3_data)] <- 0
   
   # Export
   write_parquet(rq3_data, paste0(file_path,"/rq3_quant.parquet"))
