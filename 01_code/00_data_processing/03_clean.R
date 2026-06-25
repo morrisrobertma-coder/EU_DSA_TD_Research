@@ -97,25 +97,7 @@ if(nrow(dt) > 0){
   dt[, terr := gsub('"', "", terr, fixed = TRUE)]
   dt[, terr_eu_inc_eea := as.integer(terr == eu_inc_eea)]
   dt[, terr_eu_ex_eea := as.integer(terr == eu_ex_eea)]
-  
-  # identify all countries
-  all_countries <- unique(unlist(strsplit(dt$terr, ",")))
-  all_countries <- setdiff(all_countries, c("", NA))
-  
-  # find valid rows for country expansion
-  valid_rows <- dt$terr != eu_inc_eea & dt$terr != eu_ex_eea
-  
-  for (ctry in all_countries) {
-    col_name <- paste0("terr_", tolower(ctry))
-    dt[, (col_name) := 0L]
-    
-    dt[valid_rows, (col_name) := as.integer(grepl(paste0("(^|,)",
-                                                         ctry,
-                                                         "(,|$)"),terr))]
-  }
-  
   dt[, territorial_scope := NULL]
-  dt[, terr := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Created At ----
@@ -156,7 +138,7 @@ if(nrow(dt) > 0){
   dt[, cont_type := sub("\\]$", "", cont_type)]
   dt[, cont_type := gsub('"', "", cont_type, fixed = TRUE)]
   
-  if (extr_plat == "youtube") {
+  if (extr_plat %in% c("youtube","tiktok")) {
     
     map_vec <- setNames(
       map_cont$abkurzung,

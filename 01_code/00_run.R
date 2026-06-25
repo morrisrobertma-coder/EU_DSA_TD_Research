@@ -31,7 +31,7 @@ remove_global_files <- FALSE
 # Automatic or Manual Run? ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # One Platform Approach - Define Platform 
-plat_man <- 'tiktok'
+plat_man <- 'facebook'
 
 # One Platform/One Month Approach
 plat_man_month <- 'snapchat'
@@ -39,7 +39,7 @@ plat_man_month_date <- '01'
 plat_man_month_year <- '2025'
 
 # One File Approach - Define File/Date Combination
-global_file_man <- "sor-youtube-2026-01-01-full.zip"
+global_file_man <- "sor-tiktok-2026-01-11-full.zip"
 
 # Define Automation - Aut = 'Y' = Run All Global Files
 #                     Aut Plat = 'Y' = Run One Selected Platform

@@ -42,7 +42,7 @@ for(subfile in rel_files){
     # Cut down to relevant columns
     #~~~~~~~~~~~~~~~~~~~~~~~~~~  
     # Extract all 'terr' columns
-    terr_cols <- names(dt)[startsWith(names(dt), "terr_")]
+    terr_cols <- names(dt)[startsWith(names(dt), "terr")]
     cols_to_keep <- c(rq1_cols, terr_cols)
     
     # cut down
@@ -56,8 +56,27 @@ for(subfile in rel_files){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Territory
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Identify territories to aggregate
+    terr_rows <- dt[terr_eu_inc_eea == 0 & terr_eu_inc_eea == 0, terr]
+    
+    # Split terrs
+    terr_split <- strsplit(terr_rows, ",", fixed = TRUE)
+    
+    # Find unique countries
+    countries <- unlist(terr_split, use.names = FALSE)
+    
+    # Aggregation
+    out_terr <- data.table(country = countries)[,.(sors = .N), by = country]
+    
+    # Cast
+    out_terr <- dcast(out_terr, . ~ country, value.var = "sors", fill = 0)[
+      , . := NULL]
+    
+    # Format
+    colnames(out_terr) <- paste0("terr_", tolower(colnames(out_terr)))
+    
     # Frequency table per territory stated
-    agg_2 <- dt[, lapply(.SD, sum, na.rm=TRUE), .SDcols = patterns("^terr_")]
+    agg_2 <- out_terr
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Content Date and Application Date
@@ -215,11 +234,14 @@ out_data_agg <- out_data_agg[,':='(date = paste0(extr_date),
                                    content_date_latest = max(out_data$content_date_latest))]
 
 
-# reorganize columns
+# Reorganize columns
 existing_cols <- colnames(out_data_agg)
 expected_cols <- cols_remap[,new]
 
 overlapping_cols <- intersect(expected_cols, existing_cols)
+
+# Extract all 'terr' columns
+terr_cols <- names(out_data_agg)[startsWith(names(out_data_agg), "terr")]
 
 output_col_order <- c('date','platform','total_sor_entries',
                       'content_date_earliest','content_date_latest',
