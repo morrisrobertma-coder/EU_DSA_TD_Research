@@ -262,7 +262,7 @@ cols_to_keep <- c("platform_name","territorial_scope","created_at",
 # Rename Columns
 # n.b. only use this after the fully processing - not one to one mapping
 # with 'cols_to_keep_above'
-cols_order <- c('p_name','date','time','content_d',
+cols_order <- c('p_name','date','content_d',
                 'app_d','aut_det','aut_dec','cont_type',
                 'cont_lang','source','cat','cat_spec','cat_spec_other',
                 'des_ground','des_fact','illegal_c_ground', 'illegal_c_ex',

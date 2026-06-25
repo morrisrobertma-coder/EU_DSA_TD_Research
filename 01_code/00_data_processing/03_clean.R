@@ -102,8 +102,7 @@ if(nrow(dt) > 0){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Created At ----
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
-  dt[, date := as.Date(created_at)][
-    , time := format(created_at, "%H:%M:%S")][, created_at := NULL]
+  dt[, date := as.Date(created_at)][, created_at := NULL]
   
   #~~~~~~~~~~~~~~~~~~~~~~~~~~ 
   ## Content Date ----
