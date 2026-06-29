@@ -42,6 +42,9 @@ out_rq3 <- paste0(inp, "09_rq3/")
 # Collection
 out_collection <- paste0(inp, "10_collected/")
 
+# Final Samples
+out_final_sample <- paste0(inp, "11_final")
+
 ### Platforms ----
 # Company/Platform Name Mapping
 map_platform <- as.data.table(tibble::tribble(

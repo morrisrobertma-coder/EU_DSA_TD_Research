@@ -54,7 +54,7 @@ if (aut == "N"){
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run Data Pipeline ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-if (collection_only == "N"){
+if (collection_only == "N" & run_results_only == "N"){
   for(i in global_files){
     
     # Extract Platform and Date
@@ -116,8 +116,8 @@ if (collection_only == "N"){
     # RQ3 - Categorization & Legal Status 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     source(paste0(inp_code,"02_quant/02_rq3.R"))
-    }
-  } 
+  }
+} 
   
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Aggregate All Available Outputs ----
@@ -127,11 +127,55 @@ if(collect == "Y"){
   }
 }
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Results Only 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+if(run_results_only == "Y"){
+for(i in global_files){
+  
+  # Extract Platform and Date
+  split <- strsplit(i, "-")[[1]]
+  extr_plat <- paste0(split[2])
+  
+  if(extr_plat == "whatsapp"){
+    extr_date <- paste(split[4:6], collapse = "-")
+  } else {
+    extr_date <- paste(split[3:5], collapse = "-")
+  }
+  
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Run Quantitative Analysis Pipeline ----
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # RQ1 - Data Aggregation 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    source(paste0(inp_code,"02_quant/00_rq1.R"))
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # RQ2 - Source, Detection, Moderation 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    source(paste0(inp_code,"02_quant/01_rq2.R"))
+    
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # RQ3 - Categorization & Legal Status 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    source(paste0(inp_code,"02_quant/02_rq3.R"))
+  
+    stop_pipeline_dead <- "FALSE"
+  }
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Collection Only 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
 if (collection_only == "Y"){
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Collection
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    source(paste0(inp_code,"03_collect/00_collect.R"))
+    source(paste0(inp_code,"03_final_sample_prep/00_collect.R"))
+}
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Final Sample Preparation
+#~~~~~~~~~~~~~~~~~~~~~~~~~~
+if (final_sample_prep == "Y"){
+  source(paste0(inp_code,"03_final_sample_prep/01_sample_prep.R"))
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~

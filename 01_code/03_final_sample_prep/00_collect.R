@@ -34,19 +34,22 @@ if(collect_dq == "Y"){
   
   print(paste0("RESULT COLLECTION - STEP : DATA QUALITY - START AT ", Sys.time()))
   
-  # Find All CSV Files
+  # Find All Parquet Files
   all_files <- list.files(path = out_dq_path,
-                          pattern = "\\.csv$",
+                          pattern = "\\.parquet$",
                           recursive = TRUE,
                           full.names = TRUE)
   
   # Split into DQ and Clean DQ
-  dq_clean_files <- all_files[grepl("_clean\\.csv$", basename(all_files))]
-  dq_raw_files <- all_files[!grepl("_clean\\.csv$", basename(all_files))]
+  dq_clean_files <- all_files[grepl("_clean\\.parquet$", basename(all_files))]
+  dq_raw_files <- all_files[!grepl("_clean\\.parquet$", basename(all_files))]
   
   # Read and Append All Data
-  dq_clean_data <- rbindlist(lapply(dq_clean_files, fread), fill = TRUE)
-  dq_raw_data <- rbindlist(lapply(dq_raw_files, fread), fill = TRUE)
+  dq_clean_data <- rbindlist(lapply(dq_clean_files, read_parquet), fill = TRUE)
+  dq_raw_data <- rbindlist(lapply(dq_raw_files, read_parquet), fill = TRUE)
+  
+  # Fix NAs
+  dq_clean_data[is.na(dq_clean_data)] <- 0
   
   # Export
   write_parquet(dq_clean_data, paste0(file_path,"/dq_clean.parquet"))
@@ -67,17 +70,17 @@ if(collect_qual == "Y"){
   
   print(paste0("RESULT COLLECTION - STEP : QUALITATIVE ANALYSIS - START AT ", Sys.time()))
   
-  # Find All CSV Files
-  all_files_csv <- list.files(path = out_qual_path,
-                          pattern = "\\.csv$",
+  # Find All Parquet Files
+  all_files_parquet <- list.files(path = out_qual_path,
+                          pattern = "\\.parquet$",
                           recursive = TRUE,
                           full.names = TRUE)
 
-  # Read and Append All Data - CSV
-  qual_data_csv <- rbindlist(lapply(all_files_csv, fread), fill = TRUE)
+  # Read and Append All Data - Parquet
+  qual_data_parquet <- rbindlist(lapply(all_files_parquet, read_parquet), fill = TRUE)
   
-  if(nrow(qual_data_csv)> 0){
-    qual_data_csv[
+  if(nrow(qual_data_parquet)> 0){
+    qual_data_parquet[
       , date := as.Date(date)]
   }
   
@@ -95,8 +98,7 @@ if(collect_qual == "Y"){
   }
   
   # Bind All
-  qual_data <- rbind(qual_data_csv,
-                     qual_data_par)
+  qual_data <- copy(qual_data_par)
   
   # Export
   write_parquet(qual_data, paste0(file_path,"/qual.parquet"))

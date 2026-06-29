@@ -56,9 +56,14 @@ for(subfile in rel_files){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Territory
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Aggregate High Level Cats
+    agg_2_1 <- data.table("terr_eu_inc_eea" = dt[, sum(terr_eu_inc_eea)])
+    agg_2_2 <- data.table("terr_eu_ex_eea" = dt[, sum(terr_eu_ex_eea)])
+    
     # Identify territories to aggregate
     terr_rows <- dt[terr_eu_inc_eea == 0 & terr_eu_inc_eea == 0, terr]
     
+    if (length(terr_rows) > 0){
     # Split terrs
     terr_split <- strsplit(terr_rows, ",", fixed = TRUE)
     
@@ -77,6 +82,10 @@ for(subfile in rel_files){
     
     # Frequency table per territory stated
     agg_2 <- out_terr
+    
+    } else {
+      agg_2 <- data.table()
+    }
     
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Content Date and Application Date
@@ -180,7 +189,7 @@ for(subfile in rel_files){
     out_ind <- cbind(out_ind, agg_1, dt_content_min, dt_content_max,
                      agg_3, agg_4, agg_5, agg_6, 
                      agg_7, agg_8, agg_9, agg_10, agg_11, agg_12, agg_13, agg_14,
-                     agg_2)
+                     agg_2_1,agg_2_2, agg_2)
   
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Bind to Total Output ----
@@ -241,7 +250,7 @@ expected_cols <- cols_remap[,new]
 overlapping_cols <- intersect(expected_cols, existing_cols)
 
 # Extract all 'terr' columns
-terr_cols <- names(out_data_agg)[startsWith(names(out_data_agg), "terr")]
+terr_cols <- names(out_data_agg)[startsWith(names(out_data_agg), "terr_")]
 
 output_col_order <- c('date','platform','total_sor_entries',
                       'content_date_earliest','content_date_latest',
