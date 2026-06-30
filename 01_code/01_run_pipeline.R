@@ -70,52 +70,69 @@ if (collection_only == "N" & run_results_only == "N"){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Global Data Processing
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if(run_data_processing == "Y"){
     source(paste0(inp_code,"00_data_processing/01_global.R"))
-    
+    }
+      
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Sample Staging
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if(run_sample_stage == "Y"){
     if(extr_plat == "facebook" | extr_plat == "tiktok" | extr_plat == "instagram" | extr_plat == "snapchat"){
-    source(paste0(inp_code,"00_data_processing/01a_stage.R"))
+    source(paste0(inp_code,"00_data_processing/01a_stage.R"))}
     }
       
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Platform Level Data Quality
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if(run_dq == "Y"){
     source(paste0(inp_code,"00_data_processing/02_dq.R"))
-
+    }
+      
     if(stop_pipeline_dead == "FALSE"){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Qualitative Analysis
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    source(paste0(inp_code,"01_qual/01_qual.R"))
-
+    if(run_qual == "Y"){
+      source(paste0(inp_code,"01_qual/01_qual.R"))
+    }
+      
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Data Cleaning
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    source(paste0(inp_code,"00_data_processing/03_clean.R"))
+    if(run_cleaning == "Y"){
+      source(paste0(inp_code,"00_data_processing/03_clean.R"))
+    }
       
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Upstream Data Deletion
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    source(paste0(inp_code,"00_data_processing/04_upstream_clean.R"))
-  
+    if(run_upstream == "Y"){
+      source(paste0(inp_code,"00_data_processing/04_upstream_clean.R"))
+    }
+      
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Run Quantitative Analysis Pipeline ----
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # RQ1 - Data Aggregation 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    source(paste0(inp_code,"02_quant/00_rq1.R"))
-  
+    if(run_rq1 == "Y"){
+      source(paste0(inp_code,"02_quant/00_rq1.R"))
+    }
+      
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # RQ2 - Source, Detection, Moderation 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    source(paste0(inp_code,"02_quant/01_rq2.R"))
-  
+    if(run_rq2 == "Y"){
+      source(paste0(inp_code,"02_quant/01_rq2.R"))
+    }
+      
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     # RQ3 - Categorization & Legal Status 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
-    source(paste0(inp_code,"02_quant/02_rq3.R"))
+    if(run_rq3 == "Y"){
+      source(paste0(inp_code,"02_quant/02_rq3.R"))
+    }
   }
 } 
   

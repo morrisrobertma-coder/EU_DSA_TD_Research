@@ -31,7 +31,7 @@ remove_global_files <- TRUE
 # Automatic or Manual Run? ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # One Platform Approach - Define Platform 
-plat_man <- 'youtube'
+plat_man <- 'tiktok'
 
 # One Platform/One Month Approach
 plat_man_month <- 'snapchat'
@@ -39,14 +39,14 @@ plat_man_month_date <- '01'
 plat_man_month_year <- '2025'
 
 # One File Approach - Define File/Date Combination
-global_file_man <- "sor-facebook-2025-03-25-full.zip"
+global_file_man <- "sor-facebook-2025-02-25-full.zip"
 
 # Define Automation - Aut = 'Y' = Run All Global Files
 #                     Aut Plat = 'Y' = Run One Selected Platform
 #                     Aut Plat Month = 'Y' = Run Platform/Month Combination
 #                     Aut Man = 'Y' = Run One Selected File
-aut <- "Y"
-aut_plat <- "N"
+aut <- "N"
+aut_plat <- "Y"
 aut_plat_month <- "N"
 aut_man <- "N"
 
@@ -58,6 +58,7 @@ run_sample_stage <- "Y"
 run_dq <- "Y"
 run_qual <- "Y"
 run_cleaning <- "Y"
+run_upstream <- "Y"
 run_rq1 <- "Y"
 run_rq2 <- "Y"
 run_rq3 <- "Y"
@@ -71,22 +72,22 @@ run_results_only <- "N"
 # Collect Results? ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # After run should ALL available results be amalgamated? 
-collect <- "Y"
+collect <- "N"
 
 # Run ONLY COLLECTION? - No calculation pipeline
-collection_only <- "Y"
+collection_only <- "N"
 
 # Collection Parameters
-collect_dq <- "Y"
-collect_qual <- "Y"
-collect_rq1 <- "Y"
-collect_rq2 <- "Y"
-collect_rq3 <- "Y"
+collect_dq <- "N"
+collect_qual <- "N"
+collect_rq1 <- "N"
+collect_rq2 <- "N"
+collect_rq3 <- "N"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run Final Sample Prep? ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-final_sample_prep <- "Y"
+final_sample_prep <- "N"
 
 # Define Date to Retrieve Results
 date_to_extract <- "2026-06-29"
