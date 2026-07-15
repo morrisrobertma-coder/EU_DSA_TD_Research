@@ -74,6 +74,8 @@ dt <- rbindlist(lapply(pop_files_full, function(f) fread(f, drop = drop_cols)))
   colnames_to_extract <- setdiff(colnames(dt), drop_cols)
   colnames_to_extract <- setdiff(colnames_to_extract, "file")
   dt <- dt[, ..colnames_to_extract]
+  rm(dt_samp)
+  gc()
 }
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
