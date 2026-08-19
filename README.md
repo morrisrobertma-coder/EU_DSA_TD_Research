@@ -1,6 +1,6 @@
 # European Union Digital Services Act Transparency Database (DSA-TD) Research - Master's Dissertation Project
 
-# University of Sussex, UK - Human and Social Data Science MSc - 2025/2026
+## University of Sussex, UK - Human and Social Data Science MSc - 2025/2026
 
 Author: Robert Michael Andrew Morris.
 
@@ -93,6 +93,7 @@ is coded in Python in the form of interactive Jupyter Notebooks.
     ├── 00_run_pipeline.R                              <- R file accepting parameters from '00_run.R' and running downstream scripts.
     └── xx_config.R                                    <- R file providing configuration of harded coded parameters & look up tables for pipeline.
 ```
+------------------------------------------------------------------------
 ### Operating Data Processing Pipeline
 In order to operate the data processing pipeline in R, data must be downloaded in CSV format from the EU's DSA-TD website in the standard nested zipped format containing day for one
 day for one platform. In the '00_run.R' script the following parameters must be provided. After setting the parameters, executing the script will
@@ -124,3 +125,4 @@ automatically unzip the downloaded data, perform data quality analyses, clean an
 │    ├── out_version                                  <- Define string for version column for result output.
   
 ```
+------------------------------------------------------------------------

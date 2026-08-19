@@ -27,6 +27,9 @@ out_dq_path <- paste0(inp, "04_dq/")
 # Qualitative Analysis
 out_qual_path <- paste0(inp, "05_qual/")
 
+# Qualitative Analysis - Content Type Other
+out_qual_path_cto <- paste0(inp, "xx_cto/")
+
 # Data Cleaning
 out_clean_path <- paste0(inp, "06_clean/")
 

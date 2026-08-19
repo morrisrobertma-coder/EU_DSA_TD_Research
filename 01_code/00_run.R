@@ -39,14 +39,14 @@ plat_man_month_date <- '01'
 plat_man_month_year <- '2025'
 
 # One File Approach - Define File/Date Combination
-global_file_man <- "sor-tiktok-2025-04-22-full.zip"
+global_file_man <- "sor-facebook-2026-02-16-full.zip"
 
 # Define Automation - Aut = 'Y' = Run All Global Files
 #                     Aut Plat = 'Y' = Run One Selected Platform
 #                     Aut Plat Month = 'Y' = Run Platform/Month Combination
 #                     Aut Man = 'Y' = Run One Selected File
-aut <- "N"
-aut_plat <- "Y"
+aut <- "Y"
+aut_plat <- "N"
 aut_plat_month <- "N"
 aut_man <- "N"
 
@@ -54,14 +54,15 @@ aut_man <- "N"
 # Run Steps? ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 run_data_processing <- "Y"
-run_sample_stage <- "Y"
-run_dq <- "Y"
-run_qual <- "Y"
-run_cleaning <- "Y"
+run_sample_stage <- "N"
+run_dq <- "N"
+run_qual <- "N"
+run_cto <- "Y"
+run_cleaning <- "N"
 run_upstream <- "Y"
-run_rq1 <- "Y"
-run_rq2 <- "Y"
-run_rq3 <- "Y"
+run_rq1 <- "N"
+run_rq2 <- "N"
+run_rq3 <- "N"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run Results? ----
@@ -72,28 +73,28 @@ run_results_only <- "N"
 # Collect Results? ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # After run should ALL available results be amalgamated? 
-collect <- "Y"
+collect <- "N"
 
 # Run ONLY COLLECTION? - No calculation pipeline
-collection_only <- "Y"
+collection_only <- "N"
 
 # Collection Parameters
-collect_dq <- "Y"
-collect_qual <- "Y"
-collect_rq1 <- "Y"
-collect_rq2 <- "Y"
-collect_rq3 <- "Y"
+collect_dq <- "N"
+collect_qual <- "N"
+collect_rq1 <- "N"
+collect_rq2 <- "N"
+collect_rq3 <- "N"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run Final Sample Prep? ----
 #~~~~~~~~~~~~~~~~~~~~~~~~~~
-final_sample_prep <- "Y"
+final_sample_prep <- "N"
 
 # Define Date to Retrieve Results
-date_to_extract <- "2026-07-15"
+date_to_extract <- "2026-07-24"
 
 # Define Version to Export
-out_version <- "20260715final"
+out_version <- "20260724_final"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Run Data Pipeline ----

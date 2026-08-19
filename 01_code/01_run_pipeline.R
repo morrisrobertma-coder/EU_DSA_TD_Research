@@ -88,6 +88,10 @@ if (collection_only == "N" & run_results_only == "N"){
     if(run_dq == "Y"){
     source(paste0(inp_code,"00_data_processing/02_dq.R"))
     }
+    
+    if(run_cto == "Y"){
+      stop_pipeline_dead <- "FALSE"
+    }
       
     if(stop_pipeline_dead == "FALSE"){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,6 +99,13 @@ if (collection_only == "N" & run_results_only == "N"){
     #~~~~~~~~~~~~~~~~~~~~~~~~~~
     if(run_qual == "Y"){
       source(paste0(inp_code,"01_qual/01_qual.R"))
+    }
+      
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Run Qualitative Analysis
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if(run_cto == "Y"){
+      source(paste0(inp_code,"01_qual/xx_content_type_other.R"))
     }
       
     #~~~~~~~~~~~~~~~~~~~~~~~~~~

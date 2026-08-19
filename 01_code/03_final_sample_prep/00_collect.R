@@ -46,7 +46,7 @@ if(collect_dq == "Y"){
   
   # Read and Append All Data
   dq_clean_data <- rbindlist(lapply(dq_clean_files, read_parquet), fill = TRUE)
-  dq_raw_data <- rbindlist(lapply(dq_raw_files, read_parquet), fill = TRUE)
+  dq_raw_data <- rbindlist(lapply(dq_raw_files, read_parquet), fill = TRUE, ignore.attr = TRUE)
   
   # Fix NAs
   dq_clean_data[is.na(dq_clean_data)] <- 0
